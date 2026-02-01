@@ -1,0 +1,35 @@
+version: "3"
+
+tasks:
+  # ============================================================================
+  # Documentation
+  # ============================================================================
+
+  doc:deps:
+    desc: "Install documentation dependencies"
+    cmds:
+      - pnpm install
+    sources:
+      - package.json
+      - pnpm-lock.yaml
+    generates:
+      - node_modules/.pnpm/lock.yaml
+    silent: true
+
+  doc:dev:
+    desc: "Run VitePress dev server for local documentation testing"
+    deps: [doc:deps]
+    cmds:
+      - pnpm run docs:dev
+
+  doc:build:
+    desc: "Build documentation for production"
+    deps: [doc:deps]
+    cmds:
+      - pnpm run docs:build
+
+  doc:preview:
+    desc: "Preview production build locally"
+    deps: [doc:deps, doc:build]
+    cmds:
+      - pnpm run docs:preview

@@ -1,0 +1,34 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm
+.yarn
+
+# VitePress
+.vitepress/cache/
+.vitepress/dist/
+.temp/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Task
+.task/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Devbox
+.devbox/
