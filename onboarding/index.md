@@ -6,7 +6,7 @@ Welcome to RPCU! This guide will help you get started with your first account an
 
 Before you begin, you should have:
 - [Netbird](https://netbird.io/) installed
-- [Netbox](https://www.jetify.com/devbox) installed
+- [Devbox](https://www.jetify.com/devbox) installed
 - [Optional but recommended] [Direnv](https://direnv.net/) installed
 - An access granted by an maintainer on the [RPCU GitHub organization](https://github.com/rpcu)
 - An acccount created by a maintainer in the [Netbird instance](https://netbird.rpcu.io)

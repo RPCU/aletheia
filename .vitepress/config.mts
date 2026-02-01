@@ -11,12 +11,12 @@ export default defineConfig({
   lastUpdated: true,
 
   head: [
-    ["link", { rel: "icon", href: "/logo.svg" }],
+    ["link", { rel: "icon", href: "/logo.png" }],
   ],
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: "/logo.svg",
+    logo: "/logo.png",
     search: {
       provider: "local",
     },

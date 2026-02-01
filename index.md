@@ -7,7 +7,7 @@ hero:
   text: "Technical documentation"
   tagline: Open source infrastructure project based on Openstack
   image:
-    src: /assets/logo.png
+    src: /logo.png
     alt: RPCU Logo
   actions:
     - theme: brand
