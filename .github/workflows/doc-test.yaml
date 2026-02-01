@@ -1,0 +1,19 @@
+name: Test Documentation Build on PR
+
+on:
+  pull_request:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.14.0
+      - name: Install dependencies
+        run: devbox run -- pnpm install
+      - name: Build with VitePress
+        run: devbox run -- pnpm run docs:build
