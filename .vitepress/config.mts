@@ -4,6 +4,10 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "RPCU Documentation",
   description: "Technical documentation for RPCU project",
+  sitemap: {
+    hostname: "https://docs.rpcu.io",
+    lastmodDateOnly: false
+  },
   lastUpdated: true,
 
   head: [
