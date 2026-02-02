@@ -6,7 +6,7 @@ This guide explains how to customize the operating system configuration after th
 
 System customization in [Hephaestus](https://github.com/RPCU/hephaestus) is managed through the `profiles` directory in the repository root. The system's identity and configuration are determined by its hostname.
 
-**Note on Specialized Profiles:** While most profiles are for general system configurations, the `sunraku` profile is a dedicated exception, engineered to host our Netbird VPN server. Additionally, the `lucy`, `makise`, and `quinn` profiles are specifically assigned to form the baremetal Kubernetes cluster for OpenStack.
+**Note on Specialized Profiles:** While most profiles are for general system configurations, the `sunraku` profile is a dedicated exception, engineered to host our Netbird VPN server. Notably, `sunraku` is also configured to utilize **legacy BIOS boot**, making it unique among our profiles. Additionally, the `lucy`, `makise`, and `quinn` profiles are specifically assigned to form the baremetal Kubernetes cluster for OpenStack.
 
 ### Generic Profile Installation
 When running the generated ISO in a fresh Virtual Machine, the system will automatically install the generic profile by default.
