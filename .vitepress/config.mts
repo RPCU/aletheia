@@ -2,49 +2,43 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "RPCU Documentation",
-  description: "Technical documentation for RPCU project",
+  title: 'RPCU Documentation',
+  description: 'Technical documentation for RPCU project',
   sitemap: {
-    hostname: "https://docs.rpcu.io",
-    lastmodDateOnly: false
+    hostname: 'https://docs.rpcu.io',
+    lastmodDateOnly: false,
   },
   lastUpdated: true,
 
-  head: [
-    ["link", { rel: "icon", href: "/logo.png" }],
-  ],
+  head: [['link', { rel: 'icon', href: '/logo.png' }]],
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: "/logo.png",
+    logo: '/logo.png',
     search: {
-      provider: "local",
+      provider: 'local',
     },
     editLink: {
-      pattern: "https://github.com/rpcu/aletheia/tree/main/:path",
-      text: "Edit this page on GitHub",
+      pattern: 'https://github.com/rpcu/aletheia/tree/main/:path',
+      text: 'Edit this page on GitHub',
     },
 
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Onboarding', link: '/onboarding/' },
       { text: 'Operating System', link: '/operating-system/' },
-      { text: 'GitOps', link: '/gitops/' }
+      { text: 'GitOps', link: '/gitops/' },
     ],
 
     sidebar: {
       '/': [
         {
-          text: 'Intruction',
-          items: [
-            { text: 'Welcome', link: '/introduction' },
-          ]
+          text: 'Introduction',
+          items: [{ text: 'Welcome', link: '/introduction' }],
         },
         {
           text: 'Operator Onboarding',
-          items: [
-            { text: 'Getting Started', link: '/onboarding/' },
-          ]
+          items: [{ text: 'Getting Started', link: '/onboarding/' }],
         },
         {
           text: 'Operating System',
@@ -54,11 +48,23 @@ export default defineConfig({
               text: 'Installation',
               link: '/operating-system/installation/',
               items: [
-                { text: 'Build ISO', link: '/operating-system/installation/build-iso' },
-                { text: 'Build QCOW2', link: '/operating-system/installation/build-qcow2' },
-                { text: 'Install or Upgrade', link: '/operating-system/installation/apply' },
-                { text: 'Test in a VM', link: '/operating-system/installation/testing' },
-              ]
+                {
+                  text: 'Build ISO',
+                  link: '/operating-system/installation/build-iso',
+                },
+                {
+                  text: 'Build QCOW2',
+                  link: '/operating-system/installation/build-qcow2',
+                },
+                {
+                  text: 'Install or Upgrade',
+                  link: '/operating-system/installation/apply',
+                },
+                {
+                  text: 'Test in a VM',
+                  link: '/operating-system/installation/testing',
+                },
+              ],
             },
             { text: 'Customization', link: '/operating-system/customization' },
             { text: 'User Management', link: '/operating-system/users' },
@@ -66,11 +72,17 @@ export default defineConfig({
               text: 'Kubernetes',
               link: '/operating-system/kubernetes/',
               items: [
-                { text: 'Architecture', link: '/operating-system/kubernetes/architecture' },
-                { text: 'Bootstrap', link: '/operating-system/kubernetes/bootstrap' },
-              ]
+                {
+                  text: 'Architecture',
+                  link: '/operating-system/kubernetes/architecture',
+                },
+                {
+                  text: 'Bootstrap',
+                  link: '/operating-system/kubernetes/bootstrap',
+                },
+              ],
             },
-          ]
+          ],
         },
         {
           text: 'GitOps',
@@ -79,21 +91,22 @@ export default defineConfig({
             {
               text: 'FluxCD',
               items: [
-                { text: 'Deploy Applications', link: '/gitops/fluxcd/deploy-applications' },
-              ]
+                {
+                  text: 'Deploy Applications',
+                  link: '/gitops/fluxcd/deploy-applications',
+                },
+              ],
             },
-          ]
+          ],
         },
       ],
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/rpcu' }
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/rpcu' }],
 
     footer: {
-      message: "Open source infrastructure documentation",
-      copyright: "Copyright © 2026 RPCU Contributors",
+      message: 'Open source infrastructure documentation',
+      copyright: 'Copyright © 2026 RPCU Contributors',
     },
-  }
+  },
 })
