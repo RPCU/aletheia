@@ -6,6 +6,8 @@ This guide explains how to customize the operating system configuration after th
 
 System customization in [Hephaestus](https://github.com/RPCU/hephaestus) is managed through the `profiles` directory in the repository root. The system's identity and configuration are determined by its hostname.
 
+**Note on Specialized Profiles:** While most profiles are for general system configurations, the `sunraku` profile is a dedicated exception. It is specifically engineered to host our Netbird VPN server instance, providing secure network connectivity for the infrastructure.
+
 ### Generic Profile Installation
 When running the generated ISO in a fresh Virtual Machine, the system will automatically install the generic profile by default.
 

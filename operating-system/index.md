@@ -15,6 +15,9 @@ Hephaestus serves as the foundational management system, providing:
 -   **Atomic Lifecycle Management:** Facilitates safe system upgrades and immediate rollbacks.
 -   **Optimized Artifacts:** Generates specialized VM images tailored for OpenStack and RPCU deployments.
 
+### Boot Requirements
+Hephaestus is designed exclusively for systems utilizing **UEFI (Unified Extensible Firmware Interface) BOOT**. Legacy BIOS boot is not supported. Ensure your target hardware is configured for UEFI boot mode prior to deployment.
+
 ## Core Advantages of NixOS
 
 ### Immutable Configuration
