@@ -18,6 +18,14 @@ Hephaestus serves as the foundational management system, providing:
 ### Boot Requirements
 Hephaestus is designed exclusively for systems utilizing **UEFI (Unified Extensible Firmware Interface) BOOT**. Legacy BIOS boot is not supported. Ensure your target hardware is configured for UEFI boot mode prior to deployment.
 
+## Standard Infrastructure Profiles
+
+Hephaestus defines several specialized profiles acting as the pillars of our infrastructure:
+
+-   **`lucy`, `makise`, `quinn`**: These three profiles form the **Baremetal Kubernetes Cluster**. They are dedicated exclusively to hosting the OpenStack Control Plane.
+-   **`sunraku`**: A specialized profile dedicated to hosting the **Netbird VPN Server**, securing network access to the infrastructure.
+-   **`generic`**: The default fallback profile applied during fresh installations, intended as a blank canvas for further customization.
+
 ## Core Advantages of NixOS
 
 ### Immutable Configuration
