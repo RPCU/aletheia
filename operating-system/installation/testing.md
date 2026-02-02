@@ -13,10 +13,15 @@ runIso <partition_profile> <cloud_init_config>
 
 ### Parameters
 
-| Parameter | Description |
-| :--- | :--- |
-| `<partition_profile>` | The partition layout profile to test. |
+| Parameter             | Description                                                                |
+| :-------------------- | :------------------------------------------------------------------------- |
+| `<partition_profile>` | The partition layout profile to test.                                      |
 | `<cloud_init_config>` | Boolean (`true`/`false`) to enable Cloud-Init, or a specific profile name. |
+
+**Locating Profiles:**
+
+- **System Profiles (`<cloud_init_config>`)**: Defined in the [`profiles/`](https://github.com/RPCU/hephaestus/tree/main/profiles) directory of the Hephaestus repository. Each subdirectory represents a profile name.
+-   **Partition Profiles (`<partition_profile>`)**: Defined within the [`installer/partitions/`](https://github.com/RPCU/hephaestus/tree/main/installer/partitions) directory of the Hephaestus repository. Each file or subdirectory typically corresponds to a partition scheme.
 
 ## Observation
 
