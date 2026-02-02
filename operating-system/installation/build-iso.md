@@ -4,10 +4,9 @@ This guide details the process for building a bootable ISO image using the Hepha
 
 ## Build Command
 
-To generate an ISO image, execute the `buildIso` command within the `nix-shell` environment at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus).
+To generate an ISO image, execute the `buildIso` command (automatically available if you have direnv installed otherwise you can run `devbox shell`) at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus).
 
 ```bash
-nix-shell
 buildIso <partition_profile> <cloud_init_config>
 ```
 

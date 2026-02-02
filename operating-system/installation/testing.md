@@ -4,10 +4,9 @@ This guide explains how to test installation images and configurations locally w
 
 ## Test Execution
 
-Use the `runIso` utility within the `nix-shell` (from the [Hephaestus repository](https://github.com/RPCU/hephaestus) root) to spawn a VM and simulate the installation process.
+Use the `runIso` command (automatically available if you have direnv installed otherwise you can run `devbox shell`) at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus) to spawn a VM and simulate the installation process.
 
 ```bash
-nix-shell
 runIso <partition_profile> <cloud_init_config>
 ```
 

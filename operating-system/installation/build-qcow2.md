@@ -4,10 +4,9 @@ This guide outlines the procedure for creating QCOW2 disk images, primarily for 
 
 ## Build Command
 
-To generate a QCOW2 image, utilize the `buildQcow2` command within the `nix-shell` at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus).
+To generate a QCOW2 image, utilize the `buildQcow2` command (automatically available if you have direnv installed otherwise you can run `devbox shell`) at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus).
 
 ```bash
-nix-shell
 buildQcow2 <profile_name>
 ```
 
