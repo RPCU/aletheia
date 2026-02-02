@@ -4,7 +4,7 @@ The Kubernetes cluster is designed for High Availability and resilience.
 
 ## Nodes
 
-The control plane consists of three specific nodes defined in the [Hephaestus repository](https://github.com/RPCU/hephaestus):
+The `lucy`, `makise`, and `quinn` profiles are specifically dedicated to hosting the baremetal Kubernetes cluster that forms the foundation for OpenStack. The control plane consists of three specific nodes defined in the [Hephaestus repository](https://github.com/RPCU/hephaestus):
 
 | Node | Profile | IP Address | Role |
 | :--- | :--- | :--- | :--- |
