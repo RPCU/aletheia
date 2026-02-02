@@ -50,6 +50,26 @@ export default defineConfig({
           text: 'Operating System',
           items: [
             { text: 'Overview', link: '/operating-system/' },
+            {
+              text: 'Installation',
+              link: '/operating-system/installation/',
+              items: [
+                { text: 'Build ISO', link: '/operating-system/installation/build-iso' },
+                { text: 'Build QCOW2', link: '/operating-system/installation/build-qcow2' },
+                { text: 'Install or Upgrade', link: '/operating-system/installation/apply' },
+                { text: 'Test in a VM', link: '/operating-system/installation/testing' },
+              ]
+            },
+            { text: 'Customization', link: '/operating-system/customization' },
+            { text: 'User Management', link: '/operating-system/users' },
+            {
+              text: 'Kubernetes',
+              link: '/operating-system/kubernetes/',
+              items: [
+                { text: 'Architecture', link: '/operating-system/kubernetes/architecture' },
+                { text: 'Bootstrap', link: '/operating-system/kubernetes/bootstrap' },
+              ]
+            },
           ]
         },
         {
