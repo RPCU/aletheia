@@ -12,13 +12,9 @@ Before you begin, you should have:
 - An acccount created by a maintainer in the [Netbird instance](https://netbird.rpcu.io)
 - SSH key pair for instance access.
 
-## User profile on NixOS machines
+## User Profile on NixOS Machines
 
-You just need to follow [instructions here](https://github.com/RPCU/hephaestus?tab=readme-ov-file#--adding-a-user-to-the-team-rpcu)
-
-::: tip
-You can use any existing user config in [this path](https://github.com/RPCU/hephaestus/tree/main/users/rpcu) as an example
-:::
+To configure your user profile on NixOS machines, please refer to the [User Management documentation](/operating-system/users).
 
 ## Netbird
 

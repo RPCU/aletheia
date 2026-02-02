@@ -1,29 +1,30 @@
-# Operating System
+# Operating System Architecture
 
-Learn about Hephaestus, our NixOS-based operating system configurations and custom VM images.
+This section details the architecture and management of our operating system configurations, powered by NixOS and Hephaestus.
 
-## Overview
+## System Overview
 
-RPCU uses [Hephaestus](https://github.com/RPCU/hephaestus), our NixOS forge, to provide declarative, reproducible operating system configurations optimized for OpenStack infrastructure.
+RPCU leverages [Hephaestus](https://github.com/RPCU/hephaestus), a proprietary NixOS forge, to deliver declarative and reproducible operating system configurations. These configurations are specifically engineered for optimization within OpenStack infrastructure environments.
 
-## What is Hephaestus?
+## The Hephaestus Platform
 
-Hephaestus is our NixOS-based system that provides:
-- **Declarative Configuration** - Define your entire OS configuration as code
-- **Reproducible Builds** - Same configuration always produces identical results
-- **Atomic Updates** - Upgrade or rollback entire system states safely
-- **Custom Images** - VM images optimized for OpenStack and RPCU infrastructure
+Hephaestus serves as the foundational management system, providing:
 
-## Key Benefits of NixOS
+-   **Declarative Infrastructure:** Complete operating system definitions expressed as code.
+-   **Deterministic Builds:** Guarantees identical output results across different build environments.
+-   **Atomic Lifecycle Management:** Facilitates safe system upgrades and immediate rollbacks.
+-   **Optimized Artifacts:** Generates specialized VM images tailored for OpenStack and RPCU deployments.
 
-### Declarative Configuration
-Everything from packages to system services is defined in Nix configuration files, making infrastructure truly immutable and version-controlled.
+## Core Advantages of NixOS
 
-### Reproducibility
-Build the same configuration anywhere and get identical results, eliminating "works on my machine" problems.
+### Immutable Configuration
+All system aspects, from package management to service orchestration, are defined via Nix configuration files. This ensures infrastructure immutability and facilitates strict version control.
 
-### Rollback Capability
-Every system generation is preserved, allowing instant rollback to previous working states if issues arise.
+### Environmental Consistency
+NixOS eliminates environment-specific discrepancies ("works on my machine") by ensuring that a configuration built in one environment yields the exact same result in another.
 
-### Strong Consistency
-Nix's functional approach ensures dependencies are always correct and conflicts are impossible.
+### Reliability & Recovery
+The system preserves every generation of the configuration. In the event of an issue, administrators can instantly roll back to a previous, stable state.
+
+### Dependency Integrity
+Nix's functional package management model ensures rigorous dependency resolution, preventing conflicts and maintaining system integrity.
