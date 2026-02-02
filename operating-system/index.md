@@ -16,7 +16,7 @@ Hephaestus serves as the foundational management system, providing:
 -   **Optimized Artifacts:** Generates specialized VM images tailored for OpenStack and RPCU deployments.
 
 ### Boot Requirements
-Hephaestus is designed exclusively for systems utilizing **UEFI (Unified Extensible Firmware Interface) BOOT**. Legacy BIOS boot is not supported. Ensure your target hardware is configured for UEFI boot mode prior to deployment.
+Hephaestus is designed exclusively for systems utilizing **UEFI (Unified Extensible Firmware Interface) BOOT**. Legacy BIOS boot is not supported, with the sole exception of the `sunraku` profile, which is specifically configured for legacy BIOS environments. Ensure your target hardware is configured for the appropriate boot mode prior to deployment.
 
 ## Standard Infrastructure Profiles
 
