@@ -41,6 +41,20 @@ export default defineConfig({
           items: [{ text: 'Getting Started', link: '/onboarding/' }],
         },
         {
+          text: 'Bootstrap',
+          items: [
+            {
+              text: 'OpenStack',
+              items: [
+                {
+                  text: 'Kubernetes',
+                  link: '/bootstrap/openstack/kubernetes',
+                },
+              ],
+            },
+          ],
+        },
+        {
           text: 'Operating System',
           items: [
             { text: 'Overview', link: '/operating-system/' },
