@@ -46,7 +46,7 @@ kubectl wait --for=condition=Available deployment/flux-operator -n flux-system -
 Finally, apply the patched Flux instance. This step will configure Flux to reconcile your cluster based on your Git repository.
 
 ```bash
-kubectl apply -k clusters/openstack/infrastructure/fluxcd/
+kustomize build clusters/openstack/fluxcd/ | kubectl apply -f -
 echo "⏳ Waiting for FluxInstance to be ready..."
 kubectl wait --for=condition=Ready fluxinstance/flux -n flux-system  --timeout=180s
 ```
