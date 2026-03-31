@@ -12,7 +12,7 @@ This guide outlines the procedure for creating QCOW2 disk images, primarily for 
 To generate a QCOW2 image, use the `build-qcow2` script at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus):
 
 ```bash
-devenv exec build-qcow2 --argstr profile <profile_name>
+devenv shell build-qcow2 --argstr profile <profile_name>
 ```
 
 ### Parameters
@@ -30,7 +30,7 @@ devenv exec build-qcow2 --argstr profile <profile_name>
 ```bash
 # Enter the development environment
 cd /path/to/hephaestus
-devenv exec build-qcow2 --argstr profile kaas
+devenv shell build-qcow2 --argstr profile kaas
 
 # Or with direnv (recommended)
 cd /path/to/hephaestus

@@ -31,7 +31,7 @@ devenv exec build-iso --argstr partition <partition_profile> --argstr cloud <clo
 ```bash
 # Enter the development environment
 cd /path/to/hephaestus
-devenv exec build-iso --argstr partition default70G --argstr cloud true
+devenv shell build-iso --argstr partition <partition_profile> --argstr cloud <cloud_init_config>
 
 # Or with direnv (recommended)
 cd /path/to/hephaestus

@@ -30,10 +30,8 @@ jobs:
         run: nix profile add nixpkgs#devenv
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - name: Install dependencies
-        run: devenv exec -- pnpm install
-      - name: Build with VitePress
-        run: devenv exec -- pnpm run docs:build
+      - name: Install dependencies and build
+        run: devenv shell -- bash -c "pnpm install && pnpm run docs:build"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
