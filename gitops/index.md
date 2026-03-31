@@ -9,6 +9,7 @@ RPCU uses [Argus](https://github.com/RPCU/argus), our GitOps repository, to mana
 ## What is Argus?
 
 Argus is our GitOps implementation that provides:
+
 - **Declarative Infrastructure** - Define all infrastructure as code in Git
 - **Automated Reconciliation** - FluxCD continuously syncs desired state with actual state
 - **Version Control** - Full audit trail of all infrastructure changes

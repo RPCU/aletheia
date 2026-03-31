@@ -10,8 +10,8 @@ We run a High Availability (HA) Kubernetes cluster acting as the control plane f
 
 This baremetal cluster serves a single, critical purpose: **Infrastructure as a Service (IaaS)**.
 
--   **Hosting OpenStack:** It is designed exclusively to host the OpenStack control plane components.
--   **Not for Workloads:** This is *not* the target environment for general user applications or services.
+- **Hosting OpenStack:** It is designed exclusively to host the OpenStack control plane components.
+- **Not for Workloads:** This is _not_ the target environment for general user applications or services.
 
 ### Future Kubernetes as a Service (KaaS)
 
@@ -19,11 +19,10 @@ Final user workloads will run on separate Kubernetes clusters deployed **as Virt
 
 ## Architecture
 
--   **Control Plane Nodes:** `lucy`, `makise`, `quinn`
--   **High Availability:** `kube-vip` provides a Virtual IP (VIP) for the API Server.
-
+- **Control Plane Nodes:** `lucy`, `makise`, `quinn`
+- **High Availability:** `kube-vip` provides a Virtual IP (VIP) for the API Server.
 
 ## Documentation
 
--   [Architecture Details](./architecture)
--   [Bootstrap Procedure](./bootstrap)
+- [Architecture Details](./architecture)
+- [Bootstrap Procedure](./bootstrap)

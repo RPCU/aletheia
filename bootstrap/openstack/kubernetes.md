@@ -3,19 +3,23 @@
 This document outlines the steps to manually bootstrap an OpenStack cluster before it is fully reconciled by Flux. These steps are crucial for the initial setup of a new cluster.
 
 ## 1. Clone the repo
+
 ```
 git clone git@github.com:RPCU/argus.git
 ```
 
 ## Optionnal
+
 You can execute all task with runme:
 
 - In your terminal:
+
 ```sh {"excludeFromRunAll":"true"}
 runme run --all --allow-unnamed
 ```
 
 - Or in your browser
+
 ```sh {"excludeFromRunAll":"true"}
 # Select your cluster kubeconfig and context first
 runme open

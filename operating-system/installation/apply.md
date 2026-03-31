@@ -29,6 +29,7 @@ colmena apply
 ```
 
 To target specific machines:
+
 ```bash
 colmena apply --on <machine-name>
 ```
