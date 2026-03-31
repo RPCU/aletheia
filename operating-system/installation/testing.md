@@ -13,7 +13,7 @@ This guide explains how to test installation images and configurations locally w
 Use the `test-iso` script at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus) to spawn a VM and simulate the installation process.
 
 ```bash
-devenv exec test-iso --argstr partition <partition_profile> --argstr cloud <cloud_init_config>
+devenv shell test-iso --argstr partition <partition_profile> --argstr cloud <cloud_init_config>
 ```
 
 ### Parameters
@@ -32,7 +32,7 @@ devenv exec test-iso --argstr partition <partition_profile> --argstr cloud <clou
 ```bash
 # Enter the development environment
 cd /path/to/hephaestus
-devenv exec test-iso --argstr partition default70G --argstr cloud true
+devenv shell test-iso --argstr partition default70G --argstr cloud true
 
 # Or with direnv (recommended)
 cd /path/to/hephaestus
