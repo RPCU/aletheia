@@ -1,0 +1,18 @@
+{
+  "pins": {
+    "nixbook": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "didactiklabs",
+        "repo": "nixbook"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "a32caf127a44e9c9706021205df6ff6fc95a0737",
+      "url": "https://github.com/didactiklabs/nixbook/archive/a32caf127a44e9c9706021205df6ff6fc95a0737.tar.gz",
+      "hash": "sha256-c1pW5ckepDj6p25vS5PSEfIyX8n4try2t04RKk7gxGk="
+    }
+  },
+  "version": 7
+}
