@@ -10,16 +10,17 @@ Technical documentation for the RPCU project - Open source cloud infrastructure 
 
 ### Prerequisites
 
-This project uses [Devbox](https://www.jetify.com/devbox) to manage the development environment. All dependencies (Node.js, pnpm, task) are automatically managed.
+This project uses [devenv](https://devenv.sh/) to manage the development environment. All dependencies (Node.js, pnpm, just) are automatically managed.
 
 ### Run documentation locally
 
-- [Optional if you already have Direnv installed] Run a devbox shell:
-    ```
-    devbox shell
-    ```
+- [Optional if you already have Direnv installed] Enter the devenv shell:
+
+  ```
+  devenv shell
+  ```
 
 - Run the documentation in dev mode
-    ```
-    task doc:dev
-    ```
+  ```
+  devenv exec doc-dev
+  ```

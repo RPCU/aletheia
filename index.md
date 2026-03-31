@@ -1,10 +1,9 @@
 ---
-# https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
 hero:
-  name: "RPCU"
-  text: "Technical documentation"
+  name: RPCU
+  text: Technical documentation
   tagline: Open source infrastructure project based on Openstack
   image:
     src: /logo.png
@@ -30,3 +29,4 @@ features:
   - icon: 🚀
     title: Self-Service Portal
     details: Intuitive interface for users to manage their own resources, instances, and network configurations
+---

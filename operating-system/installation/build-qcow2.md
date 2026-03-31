@@ -2,23 +2,42 @@
 
 This guide outlines the procedure for creating QCOW2 disk images, primarily for use in virtualized environments such as OpenStack.
 
+## Prerequisites
+
+- [Devenv](https://devenv.sh/) installed
+- [Direnv](https://direnv.net/) recommended for automatic environment loading
+
 ## Build Command
 
-To generate a QCOW2 image, utilize the `buildQcow2` command (automatically available if you have direnv installed otherwise you can run `devbox shell`) at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus).
+To generate a QCOW2 image, use the `build-qcow2` script at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus):
 
 ```bash
-buildQcow2 <profile_name>
+devenv exec build-qcow2 --argstr profile <profile_name>
 ```
 
 ### Parameters
 
-| Parameter        | Description                                             |
-| :--------------- | :------------------------------------------------------ |
-| `<profile_name>` | The name of the system profile to build into the image. |
+| Parameter          | Description                                             |
+| :----------------- | :------------------------------------------------------ |
+| `--argstr profile` | The name of the system profile to build into the image. |
 
 **Locating Profiles:**
 
-- **System Profiles (`<profile_name>`)**: Defined in the [`profiles/`](https://github.com/RPCU/hephaestus/tree/main/profiles) directory of the Hephaestus repository. Each subdirectory represents a profile name.
+- **System Profiles**: Defined in the [`profiles/`](https://github.com/RPCU/hephaestus/tree/main/profiles) directory of the Hephaestus repository.
+
+## Usage Example
+
+```bash
+# Enter the development environment
+cd /path/to/hephaestus
+devenv exec build-qcow2 --argstr profile kaas
+
+# Or with direnv (recommended)
+cd /path/to/hephaestus
+build-qcow2 --argstr profile kaas
+```
+
+The QCOW2 image will be generated at `./result/nixos.qcow2`.
 
 ## Deployment Notes
 

@@ -4,14 +4,15 @@ This guide details the process for bootstrapping the Kubernetes cluster using th
 
 ## Prerequisites
 
--   Access to the `lucy` node (the designated bootstrap node).
--   Root privileges (via `sudo`).
+- Access to the `lucy` node (the designated bootstrap node).
+- Root privileges (via `sudo`).
 
 ## Bootstrapping the First Node (Lucy)
 
 The `lucy` profile includes a specialized helper script `initKubeadm` that automates the initialization process.
 
 1.  **SSH into Lucy:**
+
     ```bash
     ssh user@lucy
     ```
@@ -22,6 +23,7 @@ The `lucy` profile includes a specialized helper script `initKubeadm` that autom
     ```
 
 ### What this script does:
+
 1.  **Deploys kube-vip:** Installs the static pods required for the High Availability VIP.
 2.  **Initializes Cluster:** Runs `kubeadm init` using the pre-generated config at `/etc/kubernetes/kubeadm/bootstrap.yaml`.
 3.  **Configures Access:** Sets up `kubectl` for the root user and the calling user.
