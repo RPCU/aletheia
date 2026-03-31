@@ -22,5 +22,5 @@ This project uses [devenv](https://devenv.sh/) to manage the development environ
 
 - Run the documentation in dev mode
   ```
-  devenv exec doc-dev
+  devenv shell doc-dev
   ```
