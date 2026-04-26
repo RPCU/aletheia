@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "b26553badc51b8ba6bf1b35569ddd51efbba8880",
-      "url": "https://github.com/didactiklabs/nixbook/archive/b26553badc51b8ba6bf1b35569ddd51efbba8880.tar.gz",
-      "hash": "sha256-903DLjRZ4xk4B4lTgV2gxVQeqxTW94IBlOyitn1cWn8="
+      "revision": "9f101ad41842d5a9f2c9c1ae381f9918ccd8c1b1",
+      "url": "https://github.com/didactiklabs/nixbook/archive/9f101ad41842d5a9f2c9c1ae381f9918ccd8c1b1.tar.gz",
+      "hash": "sha256-dx6rE7G7tD0pE2KMgFIiwPdOcUEewxhTmabNoLQKSmk="
     }
   },
   "version": 7
