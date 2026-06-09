@@ -106,6 +106,22 @@ export default defineConfig({
               text: 'FluxCD',
               items: [
                 {
+                  text: 'Overview',
+                  link: '/gitops/fluxcd/overview',
+                },
+                {
+                  text: 'Management Cluster',
+                  link: '/gitops/fluxcd/management-cluster',
+                },
+                {
+                  text: 'OpenStack Cluster',
+                  link: '/gitops/fluxcd/openstack-cluster',
+                },
+                {
+                  text: 'Cluster API Pivot',
+                  link: '/gitops/fluxcd/capi-pivot',
+                },
+                {
                   text: 'Deploy Applications',
                   link: '/gitops/fluxcd/deploy-applications',
                 },
