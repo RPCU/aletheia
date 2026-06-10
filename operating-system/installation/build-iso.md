@@ -3,7 +3,7 @@
 Build a bootable NixOS ISO using the [Hephaestus](https://github.com/RPCU/hephaestus) environment.
 
 ::: tip
-For the full workflow (build ISO → install on hardware → bootstrap Kubernetes → deploy Flux), see the [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md).
+For the full workflow (build ISO → install on hardware → bootstrap Kubernetes → deploy Flux), see the [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md).
 :::
 
 ## Build

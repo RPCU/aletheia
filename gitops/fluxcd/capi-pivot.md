@@ -9,7 +9,7 @@ The management cluster (`clusters/mgmt/`) is the CAPI management cluster. It can
 After the pivot, the mgmt cluster becomes self-managing: it runs the same CAPI providers that created it, reconciled by Flux from the Argus repository.
 
 ::: note
-Only the mgmt cluster is managed by CAPI. The OpenStack cluster (`clusters/openstack/`) runs on baremetal nodes bootstrapped with kubeadm and is not involved in the CAPI pivot.
+Only the mgmt cluster is managed by CAPI. The OpenStack cluster (`clusters/openstack/`) runs on baremetal nodes bootstrapped with kubeadm and is not involved in the CAPI pivot. See [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md) for the baremetal path.
 :::
 
 ```

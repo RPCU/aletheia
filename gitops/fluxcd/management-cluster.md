@@ -11,7 +11,7 @@ The management cluster (`clusters/mgmt/`) is the CAPI management cluster that ru
 
 ## Bootstrap
 
-The mgmt cluster is bootstrapped manually using kind + `clusterctl`, then pivoted to run on OpenStack VMs managed by CAPO. See [Cluster API Pivot](./capi-pivot.md) for the full workflow.
+The mgmt cluster is bootstrapped manually using kind + `clusterctl`, then pivoted to run on OpenStack VMs managed by CAPO. See [Management Cluster Bootstrap](../../bootstrap/management-cluster.md) for the full workflow.
 
 After bootstrap, Flux takes over and reconciles everything from the `clusters/mgmt/` path in the Argus repository.
 

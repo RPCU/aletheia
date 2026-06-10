@@ -25,5 +25,6 @@ Final user workloads will run on separate Kubernetes clusters deployed **as Virt
 ## Documentation
 
 - [Architecture Details](./architecture) — Node layout, HA, kubeadm config
-- [Bootstrap Procedure](./bootstrap) — kubeadm init/join commands
-- [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md) — Full end-to-end: OS install → kubeadm → Cilium → Flux
+- [Bootstrap Procedure](./bootstrap) — kubeadm init/join commands (OpenStack cluster only)
+- [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md) — Full end-to-end: OS install → kubeadm → Cilium → Flux
+- [Management Cluster Bootstrap](../../bootstrap/management-cluster.md) — CAPI-managed: kind → pivot → self-managing

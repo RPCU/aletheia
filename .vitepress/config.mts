@@ -47,6 +47,14 @@ export default defineConfig({
               text: 'Cluster Bootstrap Guide',
               link: '/bootstrap/openstack/kubernetes',
             },
+            {
+              text: 'OpenStack Cluster Bootstrap',
+              link: '/bootstrap/openstack-cluster',
+            },
+            {
+              text: 'Management Cluster Bootstrap',
+              link: '/bootstrap/management-cluster',
+            },
           ],
         },
         {
