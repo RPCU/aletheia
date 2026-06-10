@@ -28,6 +28,7 @@ export default defineConfig({
       { text: 'Onboarding', link: '/onboarding/' },
       { text: 'Operating System', link: '/operating-system/' },
       { text: 'GitOps', link: '/gitops/' },
+      { text: 'Infrastructure Notes', link: '/infrastructure-notes' },
     ],
 
     sidebar: {
@@ -128,6 +129,22 @@ export default defineConfig({
                 },
               ],
             },
+          ],
+        },
+        {
+          text: 'Infrastructure Notes',
+          items: [
+            { text: 'Overview', link: '/infrastructure-notes' },
+            { text: 'DNS Resolution', link: '/infrastructure-notes/dns-resolution' },
+            { text: 'Cilium socketLB', link: '/infrastructure-notes/cilium-socketlb' },
+            { text: 'Hetzner vSwitch', link: '/infrastructure-notes/hetzner-vswitch' },
+            { text: 'VIP Failover', link: '/infrastructure-notes/vip-failover' },
+            { text: 'Netbird VPN', link: '/infrastructure-notes/netbird-vpn' },
+            { text: 'MTU Considerations', link: '/infrastructure-notes/mtu' },
+            { text: 'NAT', link: '/infrastructure-notes/nat' },
+            { text: 'OVN Bridge', link: '/infrastructure-notes/ovn-bridge' },
+            { text: 'Kernel Modules', link: '/infrastructure-notes/kernel-modules' },
+            { text: 'Interface Naming', link: '/infrastructure-notes/interface-naming' },
           ],
         },
       ],
