@@ -1,41 +1,51 @@
 # ISO Image Generation
 
-This guide details the process for building a bootable ISO image using the Hephaestus environment.
+Build a bootable NixOS ISO using the [Hephaestus](https://github.com/RPCU/hephaestus) environment.
 
-## Prerequisites
+::: tip
+For the full workflow (build ISO → install on hardware → bootstrap Kubernetes → deploy Flux), see the [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md).
+:::
 
-- [Devenv](https://devenv.sh/) installed
-- [Direnv](https://direnv.net/) recommended for automatic environment loading
-
-## Build Command
-
-To generate an ISO image, use the `build-iso` script at the root of the [Hephaestus repository](https://github.com/RPCU/hephaestus):
+## Build
 
 ```bash
-devenv exec build-iso --argstr partition <partition_profile> --argstr cloud <cloud_init_config>
+git clone git@github.com:RPCU/hephaestus.git && cd hephaestus
+devenv shell
+build-iso --argstr partition root --argstr cloud false
 ```
 
-### Parameters
+Output goes to `./output/`.
 
-| Parameter            | Description                                                                                     |
-| :------------------- | :---------------------------------------------------------------------------------------------- |
-| `--argstr partition` | The identifier for the disk partition layout profile to be used.                                |
-| `--argstr cloud`     | Boolean (`true`/`false`) to enable Cloud-Init, or the name of a specific profile configuration. |
+## Parameters
 
-**Locating Profiles:**
+| Parameter            | Description                                                                |
+| -------------------- | -------------------------------------------------------------------------- |
+| `--argstr partition` | Disk layout: `root` (NVMe/UEFI), `root-grub` (BIOS), `small` (VMs), `test` |
+| `--argstr cloud`     | `false` (baremetal), `true` (cloud-init), or a hostname string             |
+| `--argstr disk`      | Optional: specific device (e.g., `/dev/nvme0n1`)                           |
 
-- **Partition Profiles**: Defined within the [`installer/partitions/`](https://github.com/RPCU/hephaestus/tree/main/installer/partitions) directory of the Hephaestus repository.
+## Partition Layouts
 
-## Usage Example
+Defined in `installer/partitions/`:
+
+| Profile     | Boot | Layout                                           |
+| ----------- | ---- | ------------------------------------------------ |
+| `root`      | UEFI | `/var` 200G, `/nix` 200G, `/` 100G (LVM on NVMe) |
+| `root-grub` | BIOS | Single root LV                                   |
+| `small`     | UEFI | `/var` 5G, `/nix` 30G, `/` 2G                    |
+
+## First Boot Behavior
+
+1. ISO auto-logs in as `nixos` and runs `sudo installer`
+2. Installer: auto-detects disk → wipes → partitions (disko) → `nixos-install` → reboot
+3. First boot: `ginx` pulls hephaestus repo → `colmena apply-local --sudo` → reboot into final state
+
+After this, the node auto-updates via `ginx` every 60 seconds — see [Deployment & Upgrades](../installation/apply.md).
+
+## Testing in QEMU
 
 ```bash
-# Enter the development environment
-cd /path/to/hephaestus
-devenv shell build-iso --argstr partition <partition_profile> --argstr cloud <cloud_init_config>
-
-# Or with direnv (recommended)
-cd /path/to/hephaestus
-build-iso --argstr partition default70G --argstr cloud true
+devenv exec runIso --argstr partition root --argstr cloud false
 ```
 
-The ISO will be generated in `./result/iso/`.
+Boots the ISO in a 50G virtual disk, SSH at `localhost:2222`.
