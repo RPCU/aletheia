@@ -1,14 +1,16 @@
-# Kubernetes Bootstrap Procedure
+# Kubernetes Bootstrap Procedure (OpenStack Cluster)
 
-How to bootstrap the Kubernetes cluster on the baremetal nodes using `kubeadm`.
+How to bootstrap the Kubernetes cluster on the **baremetal OpenStack nodes** using `kubeadm`. This is specifically for the production OpenStack control plane running on lucy, makise, quinn.
 
 ::: tip
-For the full end-to-end workflow (OS install → kubeadm → Cilium → Flux), see the [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md#step-2-bootstrap-kubernetes-kubeadm).
+For the full end-to-end workflow (OS install → kubeadm → Cilium → Flux), see the [OpenStack Cluster Bootstrap Guide](../../bootstrap/openstack-cluster.md#step-4-bootstrap-kubernetes-kubeadm).
+
+For the CAPI-managed management cluster, see [Management Cluster Bootstrap](../../bootstrap/management-cluster.md).
 :::
 
 ## Prerequisites
 
-- NixOS installed on all three nodes (lucy, makise, quinn) — see [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md#step-1-install-nixos-on-baremetal)
+- NixOS installed on all three nodes (lucy, makise, quinn) — see [OpenStack Cluster Bootstrap Guide](../../bootstrap/openstack-cluster.md#step-2-install-nixos-on-all-nodes)
 - SSH access to the `lucy` node (the designated bootstrap node)
 - Root privileges (`sudo`)
 
@@ -50,4 +52,4 @@ kubectl get nodes
 
 ## What's Next
 
-After kubeadm bootstrap, install Cilium (CNI) and Flux (GitOps) — see [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md#step-3-install-cilium).
+After kubeadm bootstrap, install Cilium (CNI) and Flux (GitOps) — see [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md#step-5-install-cilium-cni).

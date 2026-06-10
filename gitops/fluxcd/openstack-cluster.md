@@ -3,7 +3,7 @@
 The OpenStack cluster (`clusters/openstack/`) is the production cluster running the full OpenStack control plane via Yaook operators on baremetal nodes.
 
 ::: info
-This cluster is **not managed by Cluster API**. It runs on baremetal nodes (lucy, makise, quinn) bootstrapped with kubeadm. See [Bootstrap Guide](../../bootstrap/openstack/kubernetes.md) for the initial setup.
+This cluster is **not managed by Cluster API**. It runs on baremetal nodes (lucy, makise, quinn) bootstrapped with kubeadm. See [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md) for the initial setup.
 :::
 
 ## Purpose

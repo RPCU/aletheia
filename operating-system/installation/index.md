@@ -25,4 +25,4 @@ dd if=./output/*.iso of=/dev/sdX bs=4M status=progress
 # 3. After install, the node auto-configures via ginx
 ```
 
-For the full bootstrap process including Kubernetes and Flux, see the [Cluster Bootstrap Guide](../../bootstrap/openstack/kubernetes.md).
+For the full bootstrap process including Kubernetes and Flux, see the [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md).

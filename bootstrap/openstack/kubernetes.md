@@ -1,299 +1,62 @@
 # Cluster Bootstrap Guide
 
-This guide covers the end-to-end bootstrap process for RPCU infrastructure — from installing NixOS on baremetal nodes to a fully Flux-reconciled Kubernetes cluster running the OpenStack control plane.
+End-to-end bootstrap for RPCU infrastructure — two distinct paths depending on the cluster.
 
 ::: tip
-There are two bootstrap paths depending on the cluster:
+There are **two bootstrap paths**:
 
-- **OpenStack cluster** — Baremetal nodes (lucy, makise, quinn), kubeadm, not managed by CAPI
-- **Management cluster** — OpenStack VMs, managed by CAPI, bootstrapped via kind + pivot
+| Cluster        | Path                                           | Infra                     | Orchestrator                 |
+| -------------- | ---------------------------------------------- | ------------------------- | ---------------------------- |
+| **OpenStack**  | [Baremetal Bootstrap](../openstack-cluster.md) | Hetzner dedicated servers | kubeadm (manual)             |
+| **Management** | [CAPI Bootstrap](../management-cluster.md)     | OpenStack VMs via CAPO    | kind → pivot → self-managing |
 
-This guide covers both. Start with [OS Installation](#step-1-install-nixos-on-baremetal) for the OpenStack cluster, or jump to [Management Cluster](#management-cluster-bootstrap) if the baremetal cluster is already running.
+**Start here:** If the baremetal OpenStack cluster is not running yet, begin with the [OpenStack Cluster Bootstrap](../openstack-cluster.md). The management cluster depends on it.
 :::
 
 ---
 
-## OpenStack Cluster Bootstrap
+## Bootstrap Paths
+
+### OpenStack Cluster (baremetal)
+
+The production OpenStack control plane running on three dedicated servers.
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────────┐
-│ Build ISO        │───>│ Install NixOS     │───>│ Bootstrap K8s   │───>│ Install Flux     │
-│ (Hephaestus)     │    │ (lucy, makise,    │    │ (kubeadm)       │    │ → Yaook deploys  │
-│                   │    │  quinn)           │    │                 │    │   OpenStack      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘    └──────────────────┘
-     Step 1                  Step 2                   Step 3                  Step 4
+Build ISO → Install NixOS → kubeadm init → Cilium → Flux → Yaook/OpenStack
 ```
 
-### Step 1: Install NixOS on Baremetal
+[Full guide →](../openstack-cluster.md)
 
-The three baremetal nodes (lucy, makise, quinn) need NixOS installed via the Hephaestus ISO.
+- Nodes: lucy, makise, quinn (baremetal)
+- VIP: `10.0.0.5` via kube-vip
+- CNI: Cilium (L2 LoadBalancer, `socketLB.hostNamespaceOnly: true`)
+- No CAPI involvement
 
-#### 1.1 Build the ISO
+### Management Cluster (CAPI)
 
-```bash
-git clone git@github.com:RPCU/hephaestus.git
-cd hephaestus
-devenv shell
-```
-
-Build the installation ISO:
-
-```bash
-build-iso --argstr partition root --argstr cloud false
-```
-
-This produces a bootable ISO in `./output/`. The `root` partition layout creates:
-
-- 512M ESP (EFI boot)
-- LVM: `/var` (200G), `/nix` (200G), `/` (100G)
-
-::: info
-Available partition layouts in `installer/partitions/`:
-
-| Profile     | Disk | Boot | Layout                             |
-| ----------- | ---- | ---- | ---------------------------------- |
-| `root`      | NVMe | UEFI | `/var` 200G, `/nix` 200G, `/` 100G |
-| `root-grub` | Any  | BIOS | Single root LV                     |
-| `small`     | Any  | UEFI | `/var` 5G, `/nix` 30G, `/` 2G      |
-| `test`      | Any  | UEFI | `/var` 20G, `/` 20G                |
-
-:::
-
-#### 1.2 Write ISO to USB and install
-
-For each node (lucy, makise, quinn):
-
-1. Write the ISO to a USB drive:
-
-   ```bash
-   dd if=./output/*.iso of=/dev/sdX bs=4M status=progress
-   ```
-
-2. Boot the node from USB (UEFI mode required)
-
-3. The ISO auto-logs in as `nixos` and runs the installer automatically:
-   - Auto-detects the first unused disk
-   - Wipes disk signatures (`wipefs`)
-   - Partitions and formats (disko)
-   - Runs `nixos-install`
-   - Reboots
-
-4. After first boot, the node runs `ginx` which:
-   - Pulls the latest `hephaestus` repo from GitHub
-   - Applies `colmena apply-local --sudo` to bring the node to its declared state
-   - Reboots into the final configuration
-
-::: tip
-You can also test the ISO in a QEMU VM before deploying to hardware:
-
-```bash
-devenv exec runIso --argstr partition root --argstr cloud false
-```
-
-This boots the ISO in a 50G virtual disk with SSH port-forwarded to `localhost:2222`.
-:::
-
-#### 1.3 Verify OS installation
-
-After reboot, SSH into each node and verify:
-
-```bash
-ssh user@lucy
-sudo hostnamectl   # Should show "lucy"
-```
-
-The node is now running its Hephaestus profile and will auto-update via the `ginx` agent every 60 seconds.
-
-### Step 2: Bootstrap Kubernetes (kubeadm)
-
-The Kubernetes cluster is bootstrapped using `kubeadm` on the three baremetal nodes. The configuration is pre-generated by NixOS at `/etc/kubernetes/kubeadm/bootstrap.yaml`.
-
-See [Kubernetes Bootstrap Procedure](../../operating-system/kubernetes/bootstrap.md) for details on the `initKubeadm` and `joinCPKubeadm` scripts.
-
-#### 2.1 Initialize the first control plane node
-
-```bash
-ssh user@lucy
-sudo initKubeadm
-```
-
-This script:
-
-1. Deploys kube-vip static pods (provides VIP `10.0.0.5`)
-2. Runs `kubeadm init` with the pre-generated config
-3. Sets up `kubectl` for root and the calling user
-4. Outputs the join command for other control plane nodes
-
-#### 2.2 Join the remaining nodes
-
-Run the output join command on makise and quinn:
-
-```bash
-# On makise
-ssh user@makise
-sudo joinCPKubeadm <TOKEN> <CERT_KEY>
-
-# On quinn
-ssh user@quinn
-sudo joinCPKubeadm <TOKEN> <CERT_KEY>
-```
-
-#### 2.3 Verify the cluster
-
-```bash
-kubectl get nodes
-```
-
-Expected output — 3 nodes in `Ready` state:
+The CAPI management cluster that provisions new OpenStack-backed clusters.
 
 ```
-NAME     STATUS   ROLES           AGE   VERSION
-lucy     Ready    control-plane   ...   v1.35.4
-makise   Ready    control-plane   ...   v1.35.4
-quinn    Ready    control-plane   ...   v1.35.4
+kind cluster → CAPO provisions VMs → clusterctl move → Flux self-managing
 ```
 
-### Step 3: Install Cilium
+[Full guide →](../management-cluster.md)
 
-Cilium replaces kube-proxy (skipped during kubeadm init) and provides the CNI, eBPF networking, and L2 LoadBalancer services.
-
-```bash
-helm repo add cilium https://helm.cilium.io/
-helm repo update
-helm upgrade --install cilium cilium/cilium -n kube-system \
-  --create-namespace \
-  -f ./infrastructure/cilium/values.yaml \
-  --version 1.18.6
-```
-
-Wait for Cilium to be ready:
-
-```bash
-kubectl -n kube-system rollout status daemonset/cilium --timeout=300s
-```
-
-### Step 4: Install Flux
-
-Install the Flux Operator and FluxInstance to hand off management to GitOps.
-
-#### 4.1 Install Flux Operator
-
-```bash
-kustomize build infrastructure/fluxcd/operator/ | kubectl apply -f -
-kubectl wait --for=condition=Available deployment/flux-operator -n flux-system --timeout=180s
-```
-
-#### 4.2 Apply Flux Instance
-
-```bash
-kustomize build clusters/openstack/fluxcd/ | kubectl apply -f -
-kubectl wait --for=condition=Ready fluxinstance/flux -n flux-system --timeout=180s
-```
-
-Once the FluxInstance is ready, Flux watches the `clusters/openstack/` path in the [Argus repository](https://github.com/RPCU/argus) and begins reconciling all components automatically.
-
-### Step 5: Verify Full Reconciliation
-
-Check that all Kustomizations reach `Ready` status:
-
-```bash
-kubectl get kustomization -n flux-system
-```
-
-The reconciliation order:
-
-```
-flux-operator → fluxcd
-├─> cilium
-├─> cert-manager → cert-manager-issuer
-├─> trust-manager
-├─> gateway-api → kgateway-crds → kgateway
-├─> crossplane
-├─> external-secrets
-├─> rook (setup → configs)
-└─> yaook-operator (CRDs → operators) → yaook (OpenStack services)
-```
-
-Monitor progress:
-
-```bash
-kubectl get kustomization -n flux-system -w
-kubectl get helmrelease -A -w
-```
-
-Once complete, the full OpenStack control plane is running (Keystone, Glance, Nova, Neutron, Cinder, Octavia, Designate, Barbican, Horizon) with services accessible at `*.rpcu.vpn`.
-
----
-
-## Management Cluster Bootstrap
-
-The management cluster is CAPI-managed — it runs on OpenStack VMs provisioned by CAPO. It cannot manage itself from nothing, so it's bootstrapped via a temporary kind cluster, then pivoted.
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ kind cluster     │───>│ CAPO provisions   │───>│ clusterctl move  │
-│ (local Docker)   │    │ OpenStack VMs     │    │ (pivot)          │
-│ clusterctl init  │    │ kubeadm bootstraps│    │                  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-     Phase 1                  Phase 2                  Phase 3
-                                                      │
-                                                      ▼
-                                               ┌─────────────────┐
-                                               │ Flux reconciles  │
-                                               │ CAPI providers   │
-                                               │ (self-managing)  │
-                                               └─────────────────┘
-```
-
-::: note
-This assumes the OpenStack cluster is already running and can provision VMs via Octavia. The mgmt cluster's VMs are created by CAPO on the OpenStack deployment managed by the baremetal cluster.
-:::
-
-### Prerequisites
-
-- Docker (for running kind)
-- `clusterctl` CLI (v1.12.x)
-- `kubectl` configured for the OpenStack cluster
-- Access to OpenStack admin credentials
-- The `capo-variables` secret created on the OpenStack cluster
-
-### Pre-Flight Checklist
-
-Before first Flux reconciliation, verify these items exist:
-
-- [ ] Bootstrap the mgmt cluster with kind + clusterctl (Phase 1)
-- [ ] Install ORC v2.5.0 out-of-band (`kubectl apply` of upstream manifest)
-- [ ] Create `capo-variables` secret manually in `capo-system` namespace
-- [ ] Glance image `hephaestus-kaas-25.11-v1.35.4` uploaded
-- [ ] External network `1cfd69da-057c-4748-a0d4-de5b0ca77db2` exists
-- [ ] Flavors `small`, `medium`, `xmedium`, `large`, `xlarge` exist (created by Crossplane if running)
+- Runs on OpenStack VMs provisioned by CAPO
+- Self-managing after pivot (reconciles CAPI providers from Git)
+- LoadBalancer via OCCM/Octavia (not Cilium)
 
 ---
 
 ## Manual Secrets
 
-Only one secret must be created manually: `capo-variables`. All other secrets are derived from it via External Secrets Operator.
+### `capo-variables` (root secret)
 
-### `capo-variables` (THE ROOT SECRET)
+The single manually-managed secret. All other secrets derive from it via External Secrets Operator.
 
-**Namespace**: `capo-system`
+**Namespace**: `capo-system` (on mgmt cluster)
 **Type**: `Opaque` with key `clouds.yaml`
 **Created by**: Manual `kubectl apply` (NOT in Git, NOT managed by Flux)
-**Purpose**: The single source of truth for all OpenStack credentials
-
-This secret is consumed by:
-
-1. CAPO InfrastructureProvider (`infrastructure-openstack.yaml` — `spec.configSecret.name`)
-2. `capo-identity` ExternalSecret → `mgmt/mgmt-cloud-config` (Cluster `identityRef`)
-3. `openstack-ccm-identity` ExternalSecret → `kube-system/cloud-config` (OCCM + Cinder CSI)
-4. `external-dns` ExternalSecret → `external-dns/openstack-credentials` (Designate webhook)
-
-```bash
-# Read credentials from the OpenStack cluster's yaook namespace
-kubectl --context openstack -n yaook get secret keystone-admin \
-  -o jsonpath='{.data.OS_USERNAME}' | base64 -d
-# Repeat for OS_PASSWORD, OS_PROJECT_NAME, OS_PROJECT_DOMAIN_NAME, OS_USER_DOMAIN_NAME
-```
 
 ```yaml
 apiVersion: v1
@@ -320,22 +83,19 @@ stringData:
 ```
 
 ::: warning
-`auth_url` MUST point at the gateway endpoint (`https://keystone.rpcu.vpn/v3`), not the in-cluster Keystone service (`https://keystone.yaook.svc:5000/v3`). The mgmt cluster is a tenant of the OpenStack cluster and cannot reach in-cluster service IPs.
+`auth_url` MUST point at the gateway endpoint (`https://keystone.rpcu.vpn/v3`), not the in-cluster Keystone service (`https://keystone.yaook.svc:5000/v3`).
 :::
 
-::: note
-Because the secret is managed manually, `prune: true` on the `cluster-api-providers` Flux Kustomization will not touch it — it is not part of the Git-tracked manifests.
-:::
+**Consumers:**
 
-Three Flux Kustomizations use `wait: false` because they depend on this manually-placed secret:
+1. CAPO InfrastructureProvider (`infrastructure-openstack.yaml`)
+2. `capo-identity` ExternalSecret → `mgmt/mgmt-cloud-config` (Cluster `identityRef`)
+3. `openstack-ccm-identity` ExternalSecret → `kube-system/cloud-config` (OCCM + Cinder CSI)
+4. `external-dns` ExternalSecret → `external-dns/openstack-credentials` (Designate webhook)
 
-1. `capo-identity` — ExternalSecret cannot be Ready until `capo-variables` exists
-2. `openstack-ccm-identity` — ExternalSecret cannot be Ready until `capo-variables` exists
-3. `external-dns` — ExternalSecret cannot be Ready until `capo-variables` exists
+Three Flux Kustomizations use `wait: false` because they depend on this manually-placed secret: `capo-identity`, `openstack-ccm-identity`, `external-dns`.
 
-Flux will apply the RBAC and ExternalSecret resources, but they remain in a "not ready" state until the operator manually creates the `capo-variables` secret.
-
-### ESO-Synced Secrets (derived from capo-variables)
+### ESO-Synced Secrets
 
 | Secret                  | Namespace      | Source                                                | Consumer                      |
 | ----------------------- | -------------- | ----------------------------------------------------- | ----------------------------- |
@@ -347,7 +107,7 @@ Flux will apply the RBAC and ExternalSecret resources, but they remain in a "not
 
 ## Hardcoded OpenStack IDs
 
-OpenStack resource IDs are generated at cluster creation time and cannot be changed after the fact. These UUIDs are baked into the configuration and must be kept in sync across multiple files.
+Resource IDs generated at cluster creation time — cannot be changed after the fact.
 
 ### External/Floating Network ID
 
@@ -359,9 +119,9 @@ OpenStack resource IDs are generated at cluster creation time and cannot be chan
 | `infrastructure/openstack-ccm-identity/externalsecret.yaml` | `floating-network-id` in CCM `cloud.conf` |
 | `clusters/mgmt/apps/chihiro/cm.yaml`                        | Chihiro cluster template variable         |
 
-**Where to find it**: `openstack network list --external` on the OpenStack cluster.
+**Find it**: `openstack network list --external` on the OpenStack cluster.
 
-### Ceph RBD Secret UUID (Nova/Cinder)
+### Ceph RBD Secret UUID
 
 **UUID**: `b3ab713d-912b-49ed-adaf-bd74368e567a`
 
@@ -370,221 +130,34 @@ OpenStack resource IDs are generated at cluster creation time and cannot be chan
 | `infrastructure/yaook/nova.yaml`   | Nova `uuid` for Ceph RBD backend              |
 | `infrastructure/yaook/cinder.yaml` | Cinder `rbd_secret_uuid` for Ceph RBD backend |
 
-This is the Ceph client secret UUID, created when setting up the `cinder` Ceph user. It is internal to the OpenStack deployment and does not change.
-
 ### Default Security Group ID
 
 **UUID**: `2deeb13d-88e2-4f3a-adc8-173b9af365e7`
 
-| File                                                                | Purpose                                                                         |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `infrastructure/crossplane-resources/openstack/securityGroups.yaml` | Crossplane `external-name` annotation — Crossplane adopts the existing resource |
+| File                                                                | Purpose                               |
+| ------------------------------------------------------------------- | ------------------------------------- |
+| `infrastructure/crossplane-resources/openstack/securityGroups.yaml` | Crossplane `external-name` annotation |
 
 ### Admin Project ID
 
 **UUID**: `bae33843e66e4028b574e36cd0953fac`
 
-| File                                                               | Purpose                                                                         |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| `infrastructure/crossplane-resources/openstack/project-admin.yaml` | Crossplane `external-name` annotation — Crossplane adopts the existing resource |
+| File                                                               | Purpose                               |
+| ------------------------------------------------------------------ | ------------------------------------- |
+| `infrastructure/crossplane-resources/openstack/project-admin.yaml` | Crossplane `external-name` annotation |
 
 ---
 
 ## Environment-Specific Values
 
-These values vary per deployment and must be set correctly:
-
-| Value                       | Current Setting                        | Where to Set                                                      |
-| --------------------------- | -------------------------------------- | ----------------------------------------------------------------- |
-| External Network UUID       | `1cfd69da-057c-4748-a0d4-de5b0ca77db2` | See [External/Floating Network ID](#external-floating-network-id) |
-| API Server Floating IP      | `172.16.255.212`                       | `clusters/mgmt/clusters/mgmt.yaml`, `clusters/mgmt/cilium.yaml`   |
-| Kubernetes Version          | `v1.35.4`                              | `clusters/mgmt/clusters/mgmt.yaml`                                |
-| Image Name                  | `hephaestus-kaas-25.11-v1.35.4`        | `clusters/mgmt/clusters/mgmt.yaml`                                |
-| Flavors                     | `xmedium` (CP + workers)               | `clusters/mgmt/clusters/mgmt.yaml`                                |
-| Managed Subnet CIDR         | `192.168.1.0/24`                       | `clusters/mgmt/clusters/mgmt.yaml`                                |
-| Region                      | `hetzner`                              | `capo-variables` clouds.yaml                                      |
-| Keystone auth_url           | `https://keystone.rpcu.vpn/v3`         | `capo-variables` clouds.yaml                                      |
-| OpenStack Admin Credentials | (from `keystone-admin` secret)         | `capo-variables` clouds.yaml                                      |
-| Designate Zone              | `rpcu.lan.`                            | `infrastructure/crossplane-resources/openstack/zonedns.yaml`      |
-
----
-
-### Phase 1: Bootstrap with Kind
-
-#### 1. Create a kind cluster
-
-```bash
-kind create cluster --name capi-mgmt --wait 5m
-```
-
-#### 2. Initialize Cluster API
-
-```bash
-clusterctl init --infrastructure openstack
-```
-
-This installs:
-
-- CAPI core provider (v1.13.2)
-- Kubeadm bootstrap provider (v1.13.2)
-- Kubeadm control plane provider (v1.13.2)
-- OpenStack infrastructure provider / CAPO (v0.14.4)
-
-#### 3. Create the OpenStack credentials secret
-
-```bash
-kubectl --context kind-capi-mgmt -n capo-system create secret generic capo-variables \
-  --from-file=clouds.yaml=<path-to-clouds.yaml>
-```
-
-#### 4. Apply ClusterClass and templates
-
-```bash
-kubectl --context kind-capi-mgmt apply -f infrastructure/cluster-api-templates/
-```
-
-#### 5. Create the mgmt cluster
-
-```bash
-kubectl --context kind-capi-mgmt apply -f clusters/mgmt/clusters/mgmt.yaml
-```
-
-#### 6. Wait for the target cluster
-
-```bash
-clusterctl get kubeconfig mgmt -n mgmt > /tmp/mgmt.kubeconfig
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get nodes
-```
-
-Wait until all control-plane nodes are `Ready`.
-
-### Phase 2: Pivot (clusterctl move)
-
-#### 1. Install CAPI providers on the target
-
-```bash
-# cert-manager
-kubectl --kubeconfig /tmp/mgmt.kubeconfig apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.2/cert-manager.yaml
-
-# CAPI operator
-helm --kubeconfig /tmp/mgmt.kubeconfig upgrade --install capi-operator \
-  kubernetes-sigs.github.io/cluster-api-operator \
-  -n capi-operator-system --create-namespace \
-  --version 0.27.0 --wait
-```
-
-#### 2. Apply provider CRs
-
-```bash
-kubectl --kubeconfig /tmp/mgmt.kubeconfig apply -f infrastructure/cluster-api-providers/
-```
-
-::: warning
-`clusterctl-providers.yaml` provides v1alpha3 Provider inventory CRs that `clusterctl move` needs to discover providers. Without them, the move fails with "provider not found."
-:::
-
-#### 3. Move resources
-
-```bash
-clusterctl move --to-kubeconfig /tmp/mgmt.kubeconfig -n mgmt
-```
-
-#### 4. Verify
-
-```bash
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get cluster -A
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get kubeadmcontrolplane -A
-```
-
-### Phase 3: Self-Management via GitOps
-
-#### 1. Clean up kind
-
-```bash
-kind delete cluster --name capi-mgmt
-```
-
-#### 2. Install Cilium and Flux
-
-```bash
-# Cilium
-helm upgrade --install cilium cilium/cilium -n kube-system \
-  --kubeconfig /tmp/mgmt.kubeconfig \
-  -f ./infrastructure/cilium/values.yaml --version 1.18.6
-
-# Flux Operator
-kustomize build infrastructure/fluxcd/operator/ | \
-  kubectl --kubeconfig /tmp/mgmt.kubeconfig apply -f -
-
-# Flux Instance
-kustomize build clusters/mgmt/fluxcd/ | \
-  kubectl --kubeconfig /tmp/mgmt.kubeconfig apply -f -
-```
-
-#### 3. Create the capo-variables secret
-
-```bash
-kubectl --kubeconfig /tmp/mgmt.kubeconfig -n capo-system create secret generic capo-variables \
-  --from-file=clouds.yaml=<path-to-clouds.yaml>
-```
-
-See [Cluster API Providers README](https://github.com/RPCU/argus/blob/main/infrastructure/cluster-api-providers/README.md) for the exact secret format.
-
-#### 4. Verify
-
-```bash
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get kustomization -n flux-system
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get helmrelease -A
-```
-
-All Kustomizations reach `Ready`. The mgmt cluster is now self-managing — CAPI providers reconcile from Git, and the ClusterClass can provision new clusters.
-
----
-
-## Troubleshooting
-
-### NixOS ISO boots to login prompt but doesn't install
-
-The installer runs automatically on login. If it doesn't, run manually:
-
-```bash
-sudo installer
-```
-
-### Node doesn't come up after NixOS install
-
-Check that ginx is running and the hephaestus repo is accessible:
-
-```bash
-systemctl status ginx
-sudo osupdate   # force a one-shot update
-```
-
-### Cilium pods not starting after kubeadm
-
-Verify kube-proxy was skipped:
-
-```bash
-kubectl -n kube-system get cm kube-proxy -o yaml | grep -A2 mode
-# Should show "mode: "" or be absent
-```
-
-### clusterctl move fails with "provider not found"
-
-Ensure `clusterctl-providers.yaml` is applied on the target cluster.
-
-### CAPI providers crash-loop on mgmt
-
-Check that ORC is installed. CAPO v0.14.x depends on ORC for image resolution:
-
-```bash
-kubectl get pods -n orc-system
-```
-
-### Pod networking fails after CAPI pivot
-
-The ClusterClass templates include explicit Cilium security group rules. Verify:
-
-```bash
-openstack security group rule list k8s-cluster-mgmt-mgmt-secgroup-controlplane
-```
+| Value                  | Current Setting                        | Where to Set                                                      |
+| ---------------------- | -------------------------------------- | ----------------------------------------------------------------- |
+| External Network UUID  | `1cfd69da-057c-4748-a0d4-de5b0ca77db2` | See [External/Floating Network ID](#external-floating-network-id) |
+| API Server Floating IP | `172.16.255.212`                       | `clusters/mgmt/clusters/mgmt.yaml`, `clusters/mgmt/cilium.yaml`   |
+| Kubernetes Version     | `v1.35.4`                              | `clusters/mgmt/clusters/mgmt.yaml`                                |
+| Image Name             | `hephaestus-kaas-25.11-v1.35.4`        | `clusters/mgmt/clusters/mgmt.yaml`                                |
+| Flavors                | `xmedium` (CP + workers)               | `clusters/mgmt/clusters/mgmt.yaml`                                |
+| Managed Subnet CIDR    | `192.168.1.0/24`                       | `clusters/mgmt/clusters/mgmt.yaml`                                |
+| Region                 | `hetzner`                              | `capo-variables` clouds.yaml                                      |
+| Keystone auth_url      | `https://keystone.rpcu.vpn/v3`         | `capo-variables` clouds.yaml                                      |
+| Designate Zone         | `rpcu.lan.`                            | `infrastructure/crossplane-resources/openstack/zonedns.yaml`      |
