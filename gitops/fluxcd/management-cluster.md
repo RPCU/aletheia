@@ -15,52 +15,32 @@ The mgmt cluster is bootstrapped manually using kind + `clusterctl`, then pivote
 
 After bootstrap, Flux takes over and reconciles everything from the `clusters/mgmt/` path in the Argus repository.
 
-## Flux Deployment
-
-```bash
-# 1. Install Cilium (CNI required before Flux can schedule)
-helm upgrade --install cilium cilium/cilium -n kube-system \
-  -f ./infrastructure/cilium/values.yaml --version 1.18.6
-
-# 2. Install Flux Operator
-kustomize build infrastructure/fluxcd/operator/ | kubectl apply -f -
-kubectl wait --for=condition=Available deployment/flux-operator -n flux-system --timeout=180s
-
-# 3. Apply Flux Instance (syncs from ./clusters/mgmt)
-kustomize build clusters/mgmt/fluxcd/ | kubectl apply -f -
-kubectl wait --for=condition=Ready fluxinstance/flux -n flux-system --timeout=180s
-```
-
 ## Component Stack
 
-The mgmt cluster runs the following components, reconciled by Flux in dependency order:
+Flux reconciles the following from `clusters/mgmt/`:
 
 ```
-flux-operator
-└─> fluxcd (Flux 2.x, syncs ./clusters/mgmt)
-    ├─> cilium (eBPF CNI, LoadBalancer DISABLED — OCCM replaces it)
-    ├─> cert-manager (prerequisite for CAPI operator)
-    │   └─> cert-manager-issuer (root-mgmt CA, *.mgmt.rpcu.lan wildcard)
-    ├─> gateway-api (CRDs)
-    │   └─> kgateway-crds
-    │       └─> kgateway (patched for mgmt: *.mgmt.rpcu.lan, root-mgmt issuer)
-    ├─> external-secrets (sources CAPO credentials)
-    ├─> cluster-api-operator (depends on cert-manager)
-    ├─> orc (OpenStack Resource Controller, CAPO image dependency)
-    ├─> cluster-api-providers (depends on operator + ESO + ORC)
-    │   ├─> CoreProvider (cluster-api v1.13.2)
-    │   ├─> BootstrapProvider (kubeadm v1.13.2)
-    │   ├─> ControlPlaneProvider (kubeadm v1.13.2)
-    │   ├─> InfrastructureProvider (CAPO v0.14.4)
-    │   └─> clusterctl-providers (v1alpha3 inventory CRs for clusterctl move)
-    ├─> cluster-api-templates (ClusterClass openstack-default + versioned templates)
-    ├─> capo-identity (ESO: capo-variables → mgmt-cloud-config)
-    ├─> openstack-ccm-identity (ESO: capo-variables → kube-system/cloud-config)
-    ├─> openstack-ccm (OCCM via Octavia, replaces Cilium LB)
-    ├─> external-snapshotter-crds (VolumeSnapshot CRDs)
-    ├─> external-snapshotter (snapshot-controller)
-    ├─> openstack-cinder-csi (dynamic Cinder volumes)
-    └─> external-dns (Designate provider, syncs DNS records)
+flux-operator → fluxcd (Flux 2.x)
+├─> cilium (eBPF CNI, LoadBalancer DISABLED — OCCM replaces it)
+├─> cert-manager → cert-manager-issuer (root-mgmt CA, *.mgmt.rpcu.lan)
+├─> gateway-api → kgateway-crds → kgateway (*.mgmt.rpcu.lan)
+├─> external-secrets (sources CAPO credentials)
+├─> cluster-api-operator (depends on cert-manager)
+├─> orc (OpenStack Resource Controller, CAPO image dependency)
+├─> cluster-api-providers (depends on operator + ESO + ORC)
+│   ├─> CoreProvider (cluster-api v1.13.2)
+│   ├─> BootstrapProvider (kubeadm v1.13.2)
+│   ├─> ControlPlaneProvider (kubeadm v1.13.2)
+│   ├─> InfrastructureProvider (CAPO v0.14.4)
+│   └─> clusterctl-providers (v1alpha3 inventory CRs for clusterctl move)
+├─> cluster-api-templates (ClusterClass openstack-default + versioned templates)
+├─> capo-identity (ESO: capo-variables → mgmt-cloud-config)
+├─> openstack-ccm-identity (ESO: capo-variables → kube-system/cloud-config)
+├─> openstack-ccm (OCCM via Octavia, replaces Cilium LB)
+├─> external-snapshotter-crds (VolumeSnapshot CRDs)
+├─> external-snapshotter (snapshot-controller)
+├─> openstack-cinder-csi (dynamic Cinder volumes)
+└─> external-dns (Designate provider, syncs DNS records)
 ```
 
 ## Key Differences from OpenStack Cluster
@@ -100,6 +80,21 @@ capo-variables (manually placed secret in capo-system)
 ```
 
 The `capo-variables` secret must be created manually — see [Cluster API Providers](https://github.com/RPCU/argus/blob/main/infrastructure/cluster-api-providers/README.md) for the exact secret format.
+
+## Hardcoded OpenStack IDs
+
+OpenStack resource IDs are generated at cluster creation time and cannot be changed after the fact. These UUIDs are baked into the configuration and must be kept in sync across multiple files.
+
+| UUID                                   | What It Is                | Files                                                                                                                                 |
+| -------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `1cfd69da-057c-4748-a0d4-de5b0ca77db2` | External/Floating Network | `clusters/mgmt/clusters/mgmt.yaml`, `infrastructure/openstack-ccm-identity/externalsecret.yaml`, `clusters/mgmt/apps/chihiro/cm.yaml` |
+| `b3ab713d-912b-49ed-adaf-bd74368e567a` | Ceph RBD Secret UUID      | `infrastructure/yaook/nova.yaml`, `infrastructure/yaook/cinder.yaml`                                                                  |
+| `2deeb13d-88e2-4f3a-adc8-173b9af365e7` | Default Security Group    | `infrastructure/crossplane-resources/openstack/securityGroups.yaml`                                                                   |
+| `bae33843e66e4028b574e36cd0953fac`     | Admin Project             | `infrastructure/crossplane-resources/openstack/project-admin.yaml`                                                                    |
+
+**To find the external network UUID**: `openstack network list --external` on the OpenStack cluster.
+
+See the [Bootstrap Guide](../../bootstrap/openstack/kubernetes.md#hardcoded-openstack-ids) for detailed descriptions of each ID.
 
 ## Self-Management
 

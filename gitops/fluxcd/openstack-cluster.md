@@ -1,57 +1,54 @@
 # OpenStack Cluster
 
-The OpenStack cluster (`clusters/openstack/`) is the primary production cluster running the full OpenStack control plane via Yaook operators. It runs on **baremetal nodes** (lucy, makise, quinn) bootstrapped with kubeadm — it is **not managed by Cluster API**.
+The OpenStack cluster (`clusters/openstack/`) is the production cluster running the full OpenStack control plane via Yaook operators on baremetal nodes.
+
+::: info
+This cluster is **not managed by Cluster API**. It runs on baremetal nodes (lucy, makise, quinn) bootstrapped with kubeadm. See [Bootstrap Guide](../../bootstrap/openstack/kubernetes.md) for the initial setup.
+:::
 
 ## Purpose
 
 - Hosts the OpenStack deployment (Keystone, Glance, Nova, Neutron, Cinder, Octavia, Designate, Barbican, Horizon)
-- Runs on baremetal nodes (lucy, makise, quinn) with kube-vip HA
+- Runs on baremetal nodes with kube-vip HA (VIP `10.0.0.5`)
 - Uses Rook/Ceph for storage, Cilium for networking, kgateway for API gateway
-- Provisioned and managed manually (kubeadm), not via CAPI
 
-## Flux Deployment
+## Architecture
 
-```bash
-# 1. Install Cilium (CNI)
-helm upgrade --install cilium cilium/cilium -n kube-system \
-  -f ./infrastructure/cilium/values.yaml --version 1.18.6
+| Component        | Details                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| **Kubernetes**   | v1.35.4, kubeadm, kube-vip HA                                        |
+| **Nodes**        | lucy (10.0.0.2), makise (10.0.0.3), quinn (10.0.0.4)                 |
+| **CNI**          | Cilium v1.18.6 (L2 LoadBalancer, `socketLB.hostNamespaceOnly: true`) |
+| **Storage**      | Rook/Ceph v19.2.3 (3 monitors, NVMe SSDs, RBD + S3)                  |
+| **Gateway**      | kgateway v2.2.2 (`*.rpcu.vpn`)                                       |
+| **DNS Domain**   | `openstack.local`                                                    |
+| **Cluster Name** | `openstack`                                                          |
 
-# 2. Install Flux Operator
-kustomize build infrastructure/fluxcd/operator/ | kubectl apply -f -
-kubectl wait --for=condition=Available deployment/flux-operator -n flux-system --timeout=180s
-
-# 3. Apply Flux Instance (syncs from ./clusters/openstack)
-kustomize build clusters/openstack/fluxcd/ | kubectl apply -f -
-kubectl wait --for=condition=Ready fluxinstance/flux -n flux-system --timeout=180s
-```
+For Kubernetes architecture details, see [Kubernetes Architecture](../../operating-system/kubernetes/architecture.md).
 
 ## Component Stack
 
+Flux reconciles the following from `clusters/openstack/`:
+
 ```
-flux-operator
-└─> fluxcd (Flux 2.x, syncs ./clusters/openstack)
-    ├─> cilium (eBPF CNI, L2 LoadBalancer, socketLB.hostNamespaceOnly: true)
-    ├─> cert-manager
-    │   └─> cert-manager-issuer (root-rpcu CA, *.rpcu.vpn wildcard)
-    ├─> trust-manager (distributes RPCU root CA)
-    ├─> gateway-api (CRDs)
-    │   └─> kgateway-crds
-    │       └─> kgateway (Gateway *.rpcu.vpn)
-    ├─> crossplane (universal control plane)
-    ├─> external-secrets
-    ├─> rook (Ceph storage: 3 monitors, RBD, S3-compatible object store)
-    └─> yaook-operator (CRDs first, then individual operators)
-        └─> yaook (OpenStack service deployments)
-            ├─> Keystone, Glance, Nova, Neutron, Cinder
-            ├─> Horizon, Octavia, Designate, Barbican
-            └─> Gateway API routes per service (*.rpcu.vpn)
+flux-operator → fluxcd (Flux 2.x)
+├─> cilium (eBPF CNI, L2 LoadBalancer)
+├─> cert-manager → cert-manager-issuer (root-rpcu CA, *.rpcu.vpn)
+├─> trust-manager (distributes RPCU root CA)
+├─> gateway-api → kgateway-crds → kgateway (Gateway *.rpcu.vpn)
+├─> crossplane (universal control plane)
+├─> external-secrets
+├─> rook (Ceph storage: 3 monitors, RBD, S3-compatible object store)
+└─> yaook-operator (CRDs first, then individual operators)
+    └─> yaook (OpenStack service deployments)
+        ├─> Keystone, Glance, Nova, Neutron, Cinder
+        ├─> Horizon, Octavia, Designate, Barbican
+        └─> Gateway API routes per service (*.rpcu.vpn)
 ```
 
 ## Networking
 
 ### Cilium
-
-The OpenStack cluster uses Cilium with L2 announcements for LoadBalancer services:
 
 - **LoadBalancer IPs**: `10.0.0.240-10.0.0.253`
 - **L2 Interface**: `eno1.4000` (Hetzner vSwitch VLAN)
@@ -74,18 +71,12 @@ Services are exposed via kgateway with TLS termination:
 | Barbican       | `barbican.rpcu.vpn`  | `barbican-api:9311`    |
 | Ceph Dashboard | `ceph.rpcu.vpn`      | (Rook gateway route)   |
 
-### DNS
-
-Services are synced to OpenStack Designate via ExternalDNS (on the mgmt cluster) and Yaook operators (on this cluster).
-
 ## Storage
 
 ### Rook/Ceph
 
-- **Cluster**: `rook-ceph`
 - **Monitors**: 3 (lucy, makise, quinn)
 - **Storage**: NVMe SSDs
-- **Version**: Ceph v19.2.3
 - **Pools**: RBD (block), Object Store (S3)
 - **Dashboard**: Enabled
 
@@ -95,8 +86,6 @@ Services are synced to OpenStack Designate via ExternalDNS (on the mgmt cluster)
 - **Glance**: Image storage backed by Ceph RBD
 
 ## OpenStack Services
-
-The full OpenStack control plane is deployed via Yaook operators:
 
 | Operator                            | Purpose                   |
 | ----------------------------------- | ------------------------- |
@@ -123,13 +112,3 @@ keystone-admin (yaook namespace, created by Yaook operators)
 ├─> crossplane-openstack (ESO) → Crossplane credentials
 └─> rook-ceph (ESO) → cinder + glance client keys
 ```
-
-## Kubernetes
-
-- **Version**: v1.35.4
-- **HA**: kube-vip with ARP-based VIP at `10.0.0.5:6443`
-- **Nodes**: 3 control-plane (lucy, makise, quinn)
-- **Pod CIDR**: `10.244.0.0/16`
-- **Service CIDR**: `10.96.0.0/20`
-- **DNS Domain**: `openstack.local`
-- **Cluster Name**: `openstack`

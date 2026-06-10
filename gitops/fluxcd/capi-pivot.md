@@ -167,7 +167,9 @@ Once the pivot is verified, delete the temporary kind cluster:
 kind delete cluster --name capi-mgmt
 ```
 
-### 2. Install Flux on the mgmt cluster
+### 2. Install Cilium and Flux
+
+Install Cilium (CNI) and Flux (GitOps) on the mgmt cluster so it can reconcile itself from Git. See [Management Cluster — Flux Deployment](./management-cluster.md#component-stack) for the full component stack and dependency order.
 
 ```bash
 # Install Cilium
@@ -179,21 +181,12 @@ helm upgrade --install cilium cilium/cilium -n kube-system \
 kustomize build infrastructure/fluxcd/operator/ | \
   kubectl --kubeconfig /tmp/mgmt.kubeconfig apply -f -
 
-# Apply Flux Instance
+# Apply Flux Instance (syncs from ./clusters/mgmt)
 kustomize build clusters/mgmt/fluxcd/ | \
   kubectl --kubeconfig /tmp/mgmt.kubeconfig apply -f -
 ```
 
-### 3. Verify Flux reconciliation
-
-```bash
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get kustomization -n flux-system
-kubectl --kubeconfig /tmp/mgmt.kubeconfig get helmrelease -A
-```
-
-All Kustomizations should eventually reach `Ready` status. The CAPI providers, ClusterClass, and templates are now reconciled from Git.
-
-### 4. Create the capo-variables secret
+### 3. Create the capo-variables secret
 
 The mgmt cluster needs the OpenStack credentials secret (not managed by Flux — placed manually):
 
@@ -203,6 +196,15 @@ kubectl --kubeconfig /tmp/mgmt.kubeconfig -n capo-system create secret generic c
 ```
 
 See [Cluster API Providers README](https://github.com/RPCU/argus/blob/main/infrastructure/cluster-api-providers/README.md) for details.
+
+### 4. Verify Flux reconciliation
+
+```bash
+kubectl --kubeconfig /tmp/mgmt.kubeconfig get kustomization -n flux-system
+kubectl --kubeconfig /tmp/mgmt.kubeconfig get helmrelease -A
+```
+
+All Kustomizations should eventually reach `Ready` status. The CAPI providers, ClusterClass, and templates are now reconciled from Git.
 
 ## Summary
 

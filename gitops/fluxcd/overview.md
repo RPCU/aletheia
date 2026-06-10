@@ -50,13 +50,6 @@ resources:
   - https://github.com/controlplaneio-fluxcd/flux-operator/releases/download/v0.40.0/install.yaml
 ```
 
-Install command:
-
-```bash
-kustomize build infrastructure/fluxcd/operator/ | kubectl apply -f -
-kubectl wait --for=condition=Available deployment/flux-operator -n flux-system --timeout=180s
-```
-
 ## FluxInstance
 
 The `FluxInstance` CRD tells the operator which Flux distribution to deploy and where to sync from:
@@ -118,11 +111,6 @@ Each cluster patches the base FluxInstance to set its own sync path and domain:
 
 ```yaml
 # clusters/mgmt/fluxcd/flux-instance-patch.yaml
-apiVersion: fluxcd.controlplane.io/v1
-kind: FluxInstance
-metadata:
-  name: flux
-  namespace: flux-system
 spec:
   cluster:
     domain: "mgmt.local"
@@ -134,11 +122,6 @@ spec:
 
 ```yaml
 # clusters/openstack/fluxcd/flux-instance-patch.yaml
-apiVersion: fluxcd.controlplane.io/v1
-kind: FluxInstance
-metadata:
-  name: flux
-  namespace: flux-system
 spec:
   cluster:
     domain: "openstack.local"
@@ -176,3 +159,9 @@ flux-operator (no deps)
 ```
 
 This ensures CRDs exist before resources that depend on them, and credentials are ready before components that need them.
+
+### Manual Secrets
+
+Only one secret must be created manually: **`capo-variables`** in the `capo-system` namespace. This is the root secret from which all other OpenStack credentials are derived via External Secrets Operator. See the [Bootstrap Guide](../../bootstrap/openstack/kubernetes.md#manual-secrets) for the exact format and creation steps.
+
+Three Kustomizations (`capo-identity`, `openstack-ccm-identity`, `external-dns`) use `wait: false` because they depend on this manually-placed secret — Flux applies the resources, but they remain "not ready" until the secret appears.

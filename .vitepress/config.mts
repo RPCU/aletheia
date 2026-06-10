@@ -44,13 +44,8 @@ export default defineConfig({
           text: 'Bootstrap',
           items: [
             {
-              text: 'OpenStack',
-              items: [
-                {
-                  text: 'Kubernetes',
-                  link: '/bootstrap/openstack/kubernetes',
-                },
-              ],
+              text: 'Cluster Bootstrap Guide',
+              link: '/bootstrap/openstack/kubernetes',
             },
           ],
         },
@@ -60,7 +55,6 @@ export default defineConfig({
             { text: 'Overview', link: '/operating-system/' },
             {
               text: 'Installation',
-              link: '/operating-system/installation/',
               items: [
                 {
                   text: 'Build ISO',
@@ -71,7 +65,7 @@ export default defineConfig({
                   link: '/operating-system/installation/build-qcow2',
                 },
                 {
-                  text: 'Install or Upgrade',
+                  text: 'Deployment & Upgrades',
                   link: '/operating-system/installation/apply',
                 },
                 {
@@ -84,14 +78,13 @@ export default defineConfig({
             { text: 'User Management', link: '/operating-system/users' },
             {
               text: 'Kubernetes',
-              link: '/operating-system/kubernetes/',
               items: [
                 {
                   text: 'Architecture',
                   link: '/operating-system/kubernetes/architecture',
                 },
                 {
-                  text: 'Bootstrap',
+                  text: 'Bootstrap Procedure',
                   link: '/operating-system/kubernetes/bootstrap',
                 },
               ],
