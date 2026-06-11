@@ -129,8 +129,6 @@ makise   Ready    control-plane   ...   v1.35.4
 quinn    Ready    control-plane   ...   v1.35.4
 ```
 
-See [Kubernetes Bootstrap Procedure](../operating-system/kubernetes/bootstrap.md) for details on the `initKubeadm` and `joinCPKubeadm` scripts.
-
 ---
 
 ## Step 5: Install Cilium (CNI)

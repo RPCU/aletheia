@@ -2,10 +2,12 @@
 
 How to bootstrap the Kubernetes cluster on the **baremetal OpenStack nodes** using `kubeadm`. This is specifically for the production OpenStack control plane running on lucy, makise, quinn.
 
-::: tip
-For the full end-to-end workflow (OS install → kubeadm → Cilium → Flux), see the [OpenStack Cluster Bootstrap Guide](../../bootstrap/openstack-cluster.md#step-4-bootstrap-kubernetes-kubeadm).
+::: tip Canonical procedure
+The step-by-step `kubeadm` commands (`initKubeadm` / `joinCPKubeadm`) live in the end-to-end guide so the whole flow stays in one place:
 
-For the CAPI-managed management cluster, see [Management Cluster Bootstrap](../../bootstrap/management-cluster.md).
+**→ [OpenStack Cluster Bootstrap — Step 4: Bootstrap Kubernetes (kubeadm)](../../bootstrap/openstack-cluster.md#step-4-bootstrap-kubernetes-kubeadm)**
+
+This page only covers the surrounding context. For the CAPI-managed management cluster, see [Management Cluster Bootstrap](../../bootstrap/management-cluster.md).
 :::
 
 ## Prerequisites
@@ -14,42 +16,14 @@ For the CAPI-managed management cluster, see [Management Cluster Bootstrap](../.
 - SSH access to the `lucy` node (the designated bootstrap node)
 - Root privileges (`sudo`)
 
-## Bootstrap First Node (Lucy)
+## Procedure summary
 
-```bash
-ssh user@lucy
-sudo initKubeadm
-```
+1. **Initialize the first control plane (lucy)** with `sudo initKubeadm` — deploys kube-vip (VIP `10.0.0.5`), runs `kubeadm init` against the NixOS-generated config at `/etc/kubernetes/kubeadm/bootstrap.yaml`, sets up `kubectl`, and outputs the join command.
+2. **Join makise and quinn** with `sudo joinCPKubeadm <TOKEN> <CERT_KEY>`.
+3. **Verify** with `kubectl get nodes` — all three should report `Ready` / `control-plane`.
 
-The `initKubeadm` script:
-
-1. Deploys kube-vip static pods (VIP `10.0.0.5`)
-2. Runs `kubeadm init` with the pre-generated config at `/etc/kubernetes/kubeadm/bootstrap.yaml`
-3. Sets up `kubectl` for root and the calling user
-4. Outputs the join command for other control plane nodes
-
-## Join Remaining Nodes
-
-Run the output join command on makise and quinn:
-
-```bash
-# On makise
-sudo joinCPKubeadm <TOKEN> <CERT_KEY>
-
-# On quinn
-sudo joinCPKubeadm <TOKEN> <CERT_KEY>
-```
-
-## Verify
-
-```bash
-kubectl get nodes
-# NAME     STATUS   ROLES           AGE   VERSION
-# lucy     Ready    control-plane   ...   v1.35.4
-# makise   Ready    control-plane   ...   v1.35.4
-# quinn    Ready    control-plane   ...   v1.35.4
-```
+See [Step 4 of the OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md#step-4-bootstrap-kubernetes-kubeadm) for the exact commands and expected output.
 
 ## What's Next
 
-After kubeadm bootstrap, install Cilium (CNI) and Flux (GitOps) — see [OpenStack Cluster Bootstrap](../../bootstrap/openstack-cluster.md#step-5-install-cilium-cni).
+After kubeadm bootstrap, install Cilium (CNI) and Flux (GitOps) — see [OpenStack Cluster Bootstrap → Step 5](../../bootstrap/openstack-cluster.md#step-5-install-cilium-cni).
