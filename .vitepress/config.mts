@@ -27,6 +27,8 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Onboarding', link: '/onboarding/' },
       { text: 'Operating System', link: '/operating-system/' },
+      { text: 'Kubernetes', link: '/kubernetes/' },
+      { text: 'OpenStack', link: '/openstack/' },
       { text: 'GitOps', link: '/gitops/' },
       { text: 'Infrastructure Notes', link: '/infrastructure-notes' },
     ],
@@ -98,6 +100,28 @@ export default defineConfig({
                 },
               ],
             },
+          ],
+        },
+        {
+          text: 'Kubernetes',
+          items: [
+            { text: 'Overview', link: '/kubernetes/' },
+            {
+              text: 'Architecture',
+              link: '/operating-system/kubernetes/architecture',
+            },
+            {
+              text: 'Bootstrap Procedure',
+              link: '/operating-system/kubernetes/bootstrap',
+            },
+            { text: 'Adding a Node', link: '/openstack/adding-a-node' },
+          ],
+        },
+        {
+          text: 'OpenStack',
+          items: [
+            { text: 'Overview', link: '/openstack/' },
+            { text: 'Adding a Node', link: '/openstack/adding-a-node' },
           ],
         },
         {

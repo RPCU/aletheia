@@ -23,4 +23,7 @@ features:
   - icon: 🔓
     title: Open Source First
     details: Fully open source infrastructure, ensuring transparency, flexibility, and community-driven innovation
+  - icon: 📜
+    title: Infrastructure as Code
+    details: Almost everything about the infrastructure is described as code and reconciled by FluxCD — clusters, networking, storage, the full OpenStack control plane, and tenant resources. A change is a Git commit, with no click-ops.
 ---
