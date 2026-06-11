@@ -107,14 +107,21 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/kubernetes/' },
             {
-              text: 'Architecture',
-              link: '/operating-system/kubernetes/architecture',
+              text: 'OpenStack Cluster',
+              items: [
+                { text: 'Architecture', link: '/operating-system/kubernetes/architecture' },
+                { text: 'Bootstrap Procedure', link: '/operating-system/kubernetes/bootstrap' },
+                { text: 'Adding a Node', link: '/openstack/adding-a-node' },
+              ],
             },
             {
-              text: 'Bootstrap Procedure',
-              link: '/operating-system/kubernetes/bootstrap',
+              text: 'Management Cluster',
+              items: [
+                { text: 'Overview', link: '/gitops/fluxcd/management-cluster' },
+                { text: 'Bootstrap', link: '/bootstrap/management-cluster' },
+                { text: 'CAPI Pivot', link: '/gitops/fluxcd/capi-pivot' },
+              ],
             },
-            { text: 'Adding a Node', link: '/openstack/adding-a-node' },
           ],
         },
         {

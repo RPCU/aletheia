@@ -1,14 +1,26 @@
 # Kubernetes
 
-The baremetal Kubernetes cluster (`openstack`) is the foundation that the entire OpenStack cloud runs on. It is deployed with `kubeadm` on the lucy, makise, and quinn nodes, with `kube-vip` providing an HA API server VIP (`10.0.0.5`) and Cilium as the CNI.
+RPCU runs three types of Kubernetes clusters, each with a distinct role.
 
-## Topics
+## OpenStack Cluster (baremetal)
 
-- [Architecture](../operating-system/kubernetes/architecture.md) — nodes, HA VIP, and kubeadm settings.
-- [Bootstrap Procedure](../operating-system/kubernetes/bootstrap.md) — bring up the cluster with `kubeadm`.
-- [Adding a Node](../openstack/adding-a-node.md) — join a node and label it so the Yaook operators schedule OpenStack agents onto it.
+The foundation — a baremetal cluster (lucy, makise, quinn) that hosts the entire OpenStack control plane. Bootstrapped with kubeadm, kube-vip HA (VIP `10.0.0.5`), Cilium CNI. Not for user workloads.
 
-## Related
+- [Architecture](../operating-system/kubernetes/architecture.md)
+- [Bootstrap Procedure](../operating-system/kubernetes/bootstrap.md)
+- [Adding a Node](../openstack/adding-a-node.md)
+- [GitOps](../gitops/fluxcd/openstack-cluster.md)
 
-- [GitOps → OpenStack Cluster](../gitops/fluxcd/openstack-cluster.md) — what Flux reconciles on top of this cluster.
-- [OpenStack](../openstack/) — the cloud running on this cluster.
+## Management Cluster (CAPI)
+
+Self-managing CAPI cluster on OpenStack VMs (CAPO-provisioned). Hosts the Cluster API providers that manage itself and provision new clusters. Cannot bootstrap itself — requires a temporary kind cluster + `clusterctl move` pivot.
+
+- [Overview](../gitops/fluxcd/management-cluster.md)
+- [Bootstrap](../bootstrap/management-cluster.md)
+- [CAPI Pivot](../gitops/fluxcd/capi-pivot.md)
+
+## Workload Clusters (KaaS)
+
+Future user-facing clusters. Provisioned by the management cluster's ClusterClass (`openstack-default`) via CAPO. Runs on OpenStack VMs, designed for general user applications — not infrastructure components.
+
+To create a new workload cluster: apply a small Cluster CR referencing `openstack-default` and the management cluster handles provisioning. Templates live in [Argus](https://github.com/RPCU/argus) (`infrastructure/cluster-api-templates/`).

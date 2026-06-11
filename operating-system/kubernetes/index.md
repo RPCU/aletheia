@@ -13,9 +13,9 @@ This baremetal cluster serves a single, critical purpose: **Infrastructure as a 
 - **Hosting OpenStack:** It is designed exclusively to host the OpenStack control plane components.
 - **Not for Workloads:** This is _not_ the target environment for general user applications or services.
 
-### Future Kubernetes as a Service (KaaS)
+### Kubernetes as a Service (KaaS)
 
-Final user workloads will run on separate Kubernetes clusters deployed **as Virtual Machines** on top of the OpenStack infrastructure. These downstream clusters will be managed using [Cluster API (CAPI)](https://cluster-api.sigs.k8s.io/) with the OpenStack provider (**CAPO**), enabling a full Kubernetes-as-a-Service experience.
+See [Kubernetes → Workload Clusters](../../kubernetes/#workload-clusters-kaas).
 
 ## Architecture
 
