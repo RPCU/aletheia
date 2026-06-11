@@ -174,6 +174,7 @@ export default defineConfig({
             { text: 'MTU Considerations', link: '/infrastructure-notes/mtu' },
             { text: 'NAT', link: '/infrastructure-notes/nat' },
             { text: 'OVN Bridge', link: '/infrastructure-notes/ovn-bridge' },
+            { text: 'Cilium OVN Interface', link: '/infrastructure-notes/cilium-ovn-interface' },
             { text: 'Kernel Modules', link: '/infrastructure-notes/kernel-modules' },
             { text: 'Interface Naming', link: '/infrastructure-notes/interface-naming' },
           ],

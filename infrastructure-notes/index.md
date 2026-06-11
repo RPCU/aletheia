@@ -12,5 +12,6 @@ Custom solutions and non-obvious configurations specific to running OpenStack on
 - [MTU Considerations](./mtu) — Why 1400 everywhere, MSS clamping
 - [NAT](./nat) — SNAT for VM internet access
 - [OVN Bridge](./ovn-bridge) — br-ex with enp3s0 uplink
+- [Cilium OVN Interface](./cilium-ovn-interface) — adding br-int to Cilium for pod-to-VM routing
 - [Kernel Modules](./kernel-modules) — openvswitch, vxlan, kvm-intel, etc.
 - [Node Interface Naming](./interface-naming) — MAC-based systemd-networkd link files
