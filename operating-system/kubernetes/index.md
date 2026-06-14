@@ -15,7 +15,7 @@ This baremetal cluster serves a single, critical purpose: **Infrastructure as a 
 
 ### Kubernetes as a Service (KaaS)
 
-See [Kubernetes → Workload Clusters](../../kubernetes/#workload-clusters-kaas).
+See [Kubernetes → Workload Clusters](../../workload-clusters/).
 
 ## Architecture
 

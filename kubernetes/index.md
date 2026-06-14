@@ -18,9 +18,3 @@ Self-managing CAPI cluster on OpenStack VMs (CAPO-provisioned). Hosts the Cluste
 - [Overview](../gitops/fluxcd/management-cluster.md)
 - [Bootstrap](../bootstrap/management-cluster.md)
 - [CAPI Pivot](../gitops/fluxcd/capi-pivot.md)
-
-## Workload Clusters (KaaS)
-
-Future user-facing clusters. Provisioned by the management cluster's ClusterClass (`openstack-default`) via CAPO. Runs on OpenStack VMs, designed for general user applications — not infrastructure components.
-
-To create a new workload cluster: apply a small Cluster CR referencing `openstack-default` and the management cluster handles provisioning. Templates live in [Argus](https://github.com/RPCU/argus) (`infrastructure/cluster-api-templates/`).
