@@ -2,6 +2,8 @@
 
 Technical documentation for the RPCU project - Open source cloud infrastructure based on OpenStack.
 
+📖 **[Documentation](https://docs.rpcu.io)**
+
 ## Why Aletheia ?
 
 **Aletheia** (ἀλήθεια) means "truth" or "unconcealment" in ancient Greek philosophy. Just as aletheia reveals what is hidden, this documentation illuminates the RPCU infrastructure.
