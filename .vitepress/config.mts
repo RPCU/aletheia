@@ -122,6 +122,15 @@ export default defineConfig({
                 { text: 'CAPI Pivot', link: '/gitops/fluxcd/capi-pivot' },
               ],
             },
+            {
+              text: 'Workload Clusters',
+              items: [
+                { text: 'Overview', link: '/workload-clusters/' },
+                { text: 'Add-ons', link: '/workload-clusters/addons' },
+                { text: 'Chihiro UI', link: '/workload-clusters/chihiro' },
+                { text: 'Creating a Cluster', link: '/workload-clusters/creating-a-cluster' },
+              ],
+            },
           ],
         },
         {

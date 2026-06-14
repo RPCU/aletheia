@@ -2,11 +2,13 @@
 
 ## Problem
 
-VMs on the external network need DNS resolution. Neutron hands out a DNS server via DHCP, but the natural choice (the gateway IP `172.16.0.254`) is a keepalived VIP that floats between baremetal nodes. Nothing listens on that address for DNS by default — CoreDNS is inside Kubernetes (`10.0.0.241`), unreachable from the VM network without a proxy.
+VMs on the external network need DNS resolution. By default, Neutron would hand out the baremetal cluster's CoreDNS IP (`10.0.0.241`) to child VMs via DHCP. However, this is a Kubernetes ClusterIP that's unreachable from the VM network — it only works inside the cluster. VMs trying to use it get no DNS resolution at all.
+
+The gateway IP (`172.16.0.254`) would be the natural choice, but it's a keepalived VIP that floats between nodes, and nothing listens on it for DNS by default.
 
 ## Solution
 
-A host-level dnsmasq instance runs on each baremetal node, listening on `br-ex`. It uses `bind-dynamic` to track the keepalived VIP without restarts, and provides split DNS forwarding:
+Instead of giving VMs the unreachable CoreDNS IP, configure Neutron to use the gateway VIP (`172.16.0.254`) as the DNS server. Then deploy a host-level dnsmasq instance on each baremetal node that listens on `br-ex` and binds to the keepalived VIP. This creates a DNS proxy layer that bridges the VM network and the Kubernetes network, with split DNS forwarding:
 
 - `/rpcu.lan/` → `10.0.0.241` (CoreDNS ClusterIP — Kubernetes internal DNS, Designate records)
 - `/rpcu.vpn/` → `127.0.0.53` (host systemd-resolved)
@@ -66,4 +68,4 @@ dnsmasq (whichever node holds the VIP)
 
 ## Designate Integration
 
-Designate provides authoritative DNS for the `rpcu.lan.` zone (backed by PowerDNS). ExternalDNS on the management cluster syncs Kubernetes resources (HTTPRoute, Ingress) into Designate using the [inovex webhook provider](https://github.com/inovex/external-dns-openstack-webhook). New services automatically get DNS records in `rpcu.lan.` when their HTTPRoute is created.
+Designate provides authoritative DNS for the `rpcu.lan.` zone (backed by PowerDNS). ExternalDNS on the management cluster syncs Kubernetes resources (HTTPRoute, Ingress) into Designate using the [inovex webhook provider](https://github.com/inovex/external-dns-openstack-webhook). New services automatically get DNS records in `rpcu.lan.` when their HTTPRoute is created. This means VMs can resolve Kubernetes services by name — the dnsmasq proxy forwards `rpcu.lan` queries to CoreDNS, which in turn queries Designate for the actual records.
