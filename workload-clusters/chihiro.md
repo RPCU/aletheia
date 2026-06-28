@@ -46,7 +46,7 @@ cluster:
         version: "0.0.0"
 ```
 
-**Built-in tokens** are always available in the template without declaring a parameter: <span v-pre>`{{ chihiro.name }}`</span>, `version`, `groups`, `serviceDomain`, `ipRange`, `nodes`, and `controlPlaneReplicas`. These come from the core form fields and from automatic allocation (e.g. `ipRange`).
+**Built-in tokens** are always available in the template without declaring a parameter: <span v-pre>`{{ chihiro.name }}`</span>, `version`, `groups`, `serviceDomain`, and `controlPlaneReplicas`. These come from the core form fields.
 
 ### Injections — core `Cluster` fields
 
@@ -132,20 +132,27 @@ cluster:
         - kube-admin
 ```
 
-| Key                          | Applies to      | Meaning                                                                                                               |
-| ---------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `label`                      | all             | Field label (defaults to a humanised key).                                                                            |
-| `description`                | all             | Help text shown under the field.                                                                                      |
-| `type`                       | all             | `string` (default), `number`, `boolean`, or `select`.                                                                 |
-| `default`                    | all             | Default value. May reference other parameters/built-ins via <span v-pre>`{{ chihiro.* }}`</span>.                     |
-| `required`                   | all             | Marks the field required in the form.                                                                                 |
-| `options`                    | `select`        | List of choices — plain strings, or `{ value, label, constrain }` objects.                                            |
-| `constrain`                  | `select` option | Maps another field → allowed values; the option is only offered when that field currently matches.                    |
-| `true_value` / `false_value` | `boolean`       | Strings substituted into the template for on/off (default `"true"`/`"false"`).                                        |
-| `editable`                   | all             | `true` lets the value be edited after creation. **Requires `path`.**                                                  |
-| `path`                       | all             | Dot-path where the value is written when edited post-creation.                                                        |
-| `recompute_on`               | all             | List of other fields whose change re-resolves this one and writes it in the same update (e.g. image follows version). |
-| `visible_groups`             | all             | OIDC groups allowed to see/edit the field in the form. Empty = everyone. Admins always see all fields.                |
+| Key                          | Applies to      | Meaning                                                                                                                                                    |
+| ---------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`                      | all             | Field label (defaults to a humanised key).                                                                                                                 |
+| `description`                | all             | Help text shown under the field.                                                                                                                           |
+| `type`                       | all             | `string` (default), `number`, `boolean`, or `select`.                                                                                                      |
+| `default`                    | all             | Default value. May reference other parameters/built-ins via <span v-pre>`{{ chihiro.* }}`</span>.                                                          |
+| `required`                   | all             | Marks the field required in the form.                                                                                                                      |
+| `options`                    | `select`        | List of choices — plain strings, or `{ value, label, constrain }` objects.                                                                                 |
+| `constrain`                  | `select` option | Maps another field → allowed values; the option is only offered when that field currently matches.                                                         |
+| `true_value` / `false_value` | `boolean`       | Strings substituted into the template for on/off (default `"true"`/`"false"`).                                                                             |
+| `editable`                   | all             | `true` lets the value be edited after creation. **Requires `path`.**                                                                                       |
+| `path`                       | all             | Dot-path where the value is written when edited post-creation.                                                                                             |
+| `recompute_on`               | all             | List of other fields whose change should re-resolve this parameter. Useful when a dependency can't be inferred from `constrain` metadata.                  |
+| `implies`                    | all             | Declares fields this parameter pushes values to when edited. Each entry is `{field, source}` where `source` maps allowed values to the value written back. |
+| `visible_groups`             | all             | OIDC groups allowed to see/edit the field in the form. Empty = everyone. Admins always see all fields.                                                     |
+
+When `constrain` metadata is enough to express a dependency between fields,
+Chihiro auto-detects it. For cases where the dependency cannot be inferred
+from the option constraints, use `recompute_on` to declare it explicitly.
+The `implies` field lets a parameter push values to other fields when edited.
+See the README for full examples of both.
 
 ### Worker-group fields
 
@@ -205,6 +212,12 @@ cluster:
     max_total_nodes: 10
     max_total_cp: 9
 ```
+
+The `allowed_origins` key (also settable via `CHIHIRO_ALLOWED_ORIGINS`) is a
+comma-separated list of full origin URLs trusted for OAuth redirect host
+detection and WebSocket origin checks. The OIDC `redirect_url` host is always
+implicitly trusted. Entries are validated by exact string match (no substring
+or wildcard matching).
 
 ### Adding a new field — example
 
@@ -276,17 +289,18 @@ Environment variables in the Deployment wire up secrets and runtime dependencies
 
 ### Server, Redis, and sessions
 
-| Variable                 | Overrides             | Default                           |
-| ------------------------ | --------------------- | --------------------------------- |
-| `CHIHIRO_HOST`           | `host`                | `0.0.0.0`                         |
-| `CHIHIRO_PORT`           | `port`                | `8080`                            |
-| `CHIHIRO_REDIS_ADDR`     | `redis.addr`          | `localhost:6379`                  |
-| `CHIHIRO_REDIS_USERNAME` | `redis.username`      | `""`                              |
-| `CHIHIRO_REDIS_PASSWORD` | `redis.password`      | `""` (use a secret)               |
-| `CHIHIRO_SESSION_TTL`    | `redis.session_ttl`   | `3600`                            |
-| `CHIHIRO_SESSION_SECURE` | `session.secure`      | auto (on for HTTPS redirect URLs) |
-| `CHIHIRO_DOCS_URL`       | `docs_url`            | —                                 |
-| `CHIHIRO_DEBUG`          | enables debug logging | off                               |
+| Variable                  | Overrides             | Default                           |
+| ------------------------- | --------------------- | --------------------------------- |
+| `CHIHIRO_HOST`            | `host`                | `0.0.0.0`                         |
+| `CHIHIRO_PORT`            | `port`                | `8080`                            |
+| `CHIHIRO_REDIS_ADDR`      | `redis.addr`          | `localhost:6379`                  |
+| `CHIHIRO_REDIS_USERNAME`  | `redis.username`      | `""`                              |
+| `CHIHIRO_REDIS_PASSWORD`  | `redis.password`      | `""` (use a secret)               |
+| `CHIHIRO_SESSION_TTL`     | `redis.session_ttl`   | `3600`                            |
+| `CHIHIRO_SESSION_SECURE`  | `session.secure`      | auto (on for HTTPS redirect URLs) |
+| `CHIHIRO_ALLOWED_ORIGINS` | `allowed_origins`     | —                                 |
+| `CHIHIRO_DOCS_URL`        | `docs_url`            | —                                 |
+| `CHIHIRO_DEBUG`           | enables debug logging | off                               |
 
 ## Source
 
